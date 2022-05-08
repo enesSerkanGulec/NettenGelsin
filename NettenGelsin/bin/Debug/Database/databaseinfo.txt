@@ -1,0 +1,5 @@
+﻿Server:127.0.0.1
+Port:3306
+Uid:nettengelsin
+Pwd:Netten2020Gelsin
+Database:nettengelsin
