@@ -1,0 +1,1132 @@
+﻿public class Nesne_brand
+    {
+        public int id;
+        public string name;
+        public string slug;
+        public string distributorCode;
+        public string distributor;
+        public string metaKeywords;
+        public string metaDescription;
+        public string pageTitle;
+
+        public static string tabloAdı = "brand";
+        public static Thread T_veriÇekme; //ideasoft tan
+        public static Thread T_veriYazma; //ideasoft a
+        
+        public static string tabloYapısı { get {return "id INT(11), name TINYTEXT, slug TINYTEXT,  distributorCode TINYTEXT, distributor TINYTEXT, metaKeywords TINYTEXT, metaDescription TINYTEXT, pageTitle TINYTEXT"; } }
+
+        public static void _verileriÇek(MySqlConnection con, System.Windows.Forms.Label l)
+        {
+            DateTime t_Start = DateTime.Now;
+            int page = 0;
+            IRestResponse data;
+            bool devam = true;
+            StringBuilder sCommand = new StringBuilder("INSERT INTO " + tabloAdı + "(id, name, slug, distributorCode, distributor, metaKeywords, metaDescription, pageTitle) VALUES ");
+            List<string> Rows = new List<string>();
+            int gönderilenVeriUzunluğu = 0;
+            MySqlCommand cmd = new MySqlCommand();
+            cmd.Connection = con;
+            int bekleme;
+            while (devam)
+            {
+                page++;
+                int tekrar = 0;
+                bekleme = Thread_Apiİşlemleri.bekleme;
+                do
+                {
+                    l.Text = "limit=100 page=" + page.ToString() + "     veri çekiliyor..(Bekleme: " + bekleme.ToString() + ")";
+                    Thread.Sleep(bekleme);
+                    data = Entegrasyon.GET("brands", "limit=100&page=" + page.ToString());
+                    if (devam = data.IsSuccessful) break;
+                    else
+                    {
+                        bekleme *= Thread_Apiİşlemleri.tekrarÇarpan;
+                        tekrar++;
+                    }
+                } while (tekrar < Thread_Apiİşlemleri.tekrar);
+                if (devam)
+                {
+                    l.Text += page.ToString() + "   " + data.StatusCode.ToString();
+                    dynamic d = JsonConvert.DeserializeObject(data.Content);
+                    if (devam = (d.Count > 0))
+                    {
+                        foreach (var item in d)
+                        {
+                            Rows.Add(string.Format("({0},'{1}','{2}','{3}','{4}','{5}','{6}','{7}')", ((long)item["id"].Value).ToString(), (string)item["name"].Value, (string)item["slug"].Value, (string)item["distributorCode"].Value, (string)item["distributor"].Value, ((string)item["metaKeywords"].Value).Replace("'","\\'"), ((string)item["metaDescription"].Value).Replace("'", "\\'"), ((string)item["pageTitle"].Value).Replace("'", "\\'")));
+                            gönderilenVeriUzunluğu += Rows[Rows.Count - 1].Length;
+                        }
+                        if (gönderilenVeriUzunluğu > ((veritabanı.gönderilenPaketBoyutu-1) * 1024 * 1024))
+                        {
+                            sCommand.Append(string.Join(",", Rows));
+                            sCommand.Append(";");
+                            cmd.CommandText = sCommand.ToString();
+                            cmd.CommandType = CommandType.Text;
+                            cmd.ExecuteNonQuery();
+                            Rows.Clear();
+                            sCommand = new StringBuilder("INSERT INTO " + tabloAdı + "(id, name, slug, distributorCode, distributor, metaKeywords, metaDescription, pageTitle) VALUES ");
+                        }
+                    }
+                    else page--;
+                }
+            }
+            if (Rows.Count > 0)
+            {
+                sCommand.Append(string.Join(",", Rows));
+                sCommand.Append(";");
+                cmd.CommandText = sCommand.ToString();
+                cmd.CommandType = CommandType.Text;
+                cmd.ExecuteNonQuery();
+            }
+            con.Close();
+            TimeSpan geçen = DateTime.Now.Subtract(t_Start);
+            l.Text = "İşlem Bitti. Geçen süre: " + (geçen.Days == 0 ? "" : geçen.Days.ToString() + " gün ") + (geçen.Hours == 0 ? "" : geçen.Hours.ToString() + " saat ") + (geçen.Minutes == 0 ? "" : geçen.Minutes.ToString() + " dakika ") + (geçen.Seconds == 0 ? "" : geçen.Seconds.ToString() + " saniye") + " SON PAGE=" + page.ToString();
+        }
+
+        public static bool verileriÇek(System.Windows.Forms.Label l) //ideaSoft tan
+        {
+            if (T_veriÇekme != null) if (T_veriÇekme.IsAlive) return false;
+            MySqlConnection con = new MySqlConnection(veritabanı.connectionString);
+            con.Open();
+            if (veritabanı.tabloVarmı(tabloAdı,con)) veritabanı.tabloyuBoşalt(tabloAdı, con);
+            else veritabanı.tabloOluştur_withoutId(tabloAdı, tabloYapısı, con);
+            Thread_Apiİşlemleri.işEkle(T_veriÇekme = new Thread(() => _verileriÇek(con, l)));
+            T_veriÇekme.Start();
+            return true;
+        }
+    }
+    public class Nesne_currency
+    {
+        public int id;
+        public string label;
+        public string abbr;
+
+        public static string tabloAdı = "currency";
+        public static Thread T_veriÇekme; //ideasoft tan
+        public static Thread T_veriYazma; //ideasoft a
+
+        public static string tabloYapısı { get { return "id INT(11), label TINYTEXT, abbr TINYTEXT"; } }
+
+        public static void _verileriÇek(MySqlConnection con, System.Windows.Forms.Label l)
+        {
+            DateTime t_Start = DateTime.Now;
+            int page = 0;
+            IRestResponse data;
+            bool devam = true;
+            StringBuilder sCommand = new StringBuilder("INSERT INTO " + tabloAdı + "(id, label, abbr) VALUES ");
+            List<string> Rows = new List<string>();
+            int gönderilenVeriUzunluğu = 0;
+            MySqlCommand cmd = new MySqlCommand();
+            cmd.Connection = con;
+            int bekleme;
+            while (devam)
+            {
+                page++;
+                int tekrar = 0;
+                bekleme = Thread_Apiİşlemleri.bekleme;
+                do
+                {
+                    l.Text = "limit=100 page=" + page.ToString() + "     veri çekiliyor..(Bekleme: " + bekleme.ToString() + ")";
+                    Thread.Sleep(bekleme);
+                    data = Entegrasyon.GET("currencies", "limit=100&page=" + page.ToString());
+                    if (devam = data.IsSuccessful) break;
+                    else
+                    {
+                        bekleme *= Thread_Apiİşlemleri.tekrarÇarpan;
+                        tekrar++;
+                    }
+                } while (tekrar < Thread_Apiİşlemleri.tekrar);
+                if (devam)
+                {
+                    l.Text += page.ToString() + "   " + data.StatusCode.ToString();
+                    dynamic d = JsonConvert.DeserializeObject(data.Content);
+                    if (devam = (d.Count > 0))
+                    {
+                        foreach (var item in d)
+                        {
+                            Rows.Add(string.Format("({0},'{1}','{2}')", ((long)item["id"].Value).ToString(), (string)item["label"].Value, (string)item["abbr"].Value));
+                            gönderilenVeriUzunluğu += Rows[Rows.Count - 1].Length;
+                        }
+                        if (gönderilenVeriUzunluğu > ((veritabanı.gönderilenPaketBoyutu-1) * 1024 * 1024))
+                        {
+                            sCommand.Append(string.Join(",", Rows));
+                            sCommand.Append(";");
+                            cmd.CommandText = sCommand.ToString();
+                            cmd.CommandType = CommandType.Text;
+                            cmd.ExecuteNonQuery();
+                            Rows.Clear();
+                            sCommand = new StringBuilder("INSERT INTO " + tabloAdı + "(id, label, abbr) VALUES ");
+                        }
+                    }
+                    else page--;
+                }
+            }
+            if (Rows.Count > 0)
+            {
+                sCommand.Append(string.Join(",", Rows));
+                sCommand.Append(";");
+                cmd.CommandText = sCommand.ToString();
+                cmd.CommandType = CommandType.Text;
+                cmd.ExecuteNonQuery();
+            }
+            con.Close();
+            TimeSpan geçen = DateTime.Now.Subtract(t_Start);
+            l.Text = "İşlem Bitti. Geçen süre: " + (geçen.Days == 0 ? "" : geçen.Days.ToString() + " gün ") + (geçen.Hours == 0 ? "" : geçen.Hours.ToString() + " saat ") + (geçen.Minutes == 0 ? "" : geçen.Minutes.ToString() + " dakika ") + (geçen.Seconds == 0 ? "" : geçen.Seconds.ToString() + " saniye") + " SON PAGE=" + page.ToString();
+        }
+
+        public static bool verileriÇek(System.Windows.Forms.Label l) //ideaSoft tan
+        {
+            if (T_veriÇekme != null) if (T_veriÇekme.IsAlive) return false;
+            MySqlConnection con = new MySqlConnection(veritabanı.connectionString);
+            con.Open();
+            if (veritabanı.tabloVarmı(tabloAdı, con)) veritabanı.tabloyuBoşalt(tabloAdı, con);
+            else veritabanı.tabloOluştur_withoutId(tabloAdı, tabloYapısı, con);
+            Thread_Apiİşlemleri.işEkle(T_veriÇekme = new Thread(() => _verileriÇek(con, l)));
+            T_veriÇekme.Start();
+            return true;
+        }
+    }
+    public class Nesne_price
+    {
+        public int id;
+        public double value;
+        public int type;
+        public int productId;
+
+        public static string tabloAdı = "price";
+        public static Thread T_veriÇekme; //ideasoft tan
+        public static Thread T_veriYazma; //ideasoft a
+
+        public static string tabloYapısı { get { return "id INT(11), value FLOAT, type INT(1), productId INT(11)"; } }
+
+        public static void _verileriÇek(MySqlConnection con, System.Windows.Forms.Label l)
+        {
+            DateTime t_Start = DateTime.Now;
+            int page = 0;
+            IRestResponse data;
+            bool devam = true;
+            StringBuilder sCommand = new StringBuilder("INSERT INTO " + tabloAdı + "(id, value, type, productId) VALUES ");
+            List<string> Rows = new List<string>();
+            int gönderilenVeriUzunluğu = 0;
+            MySqlCommand cmd = new MySqlCommand();
+            cmd.Connection = con;
+            int bekleme;
+            while (devam)
+            {
+                page++;
+                int tekrar = 0;
+                bekleme = Thread_Apiİşlemleri.bekleme;
+                do
+                {
+                    l.Text = "limit=100 page=" + page.ToString() + "     veri çekiliyor..(Bekleme: " + bekleme.ToString() + ")";
+                    Thread.Sleep(bekleme);
+                    data = Entegrasyon.GET("product_prices", "limit=100&page=" + page.ToString());
+                    if (devam = data.IsSuccessful) break;
+                    else
+                    {
+                        bekleme *= Thread_Apiİşlemleri.tekrarÇarpan;
+                        tekrar++;
+                    }
+                } while (tekrar < Thread_Apiİşlemleri.tekrar);
+                if (devam)
+                {
+                    l.Text += page.ToString() + "   " + data.StatusCode.ToString();
+                    dynamic d = JsonConvert.DeserializeObject(data.Content);
+                    if (devam = (d.Count > 0))
+                    {
+                        foreach (var item in d)
+                        {
+                            Rows.Add(string.Format("({0},{1},{2},{3})", ((long)item["id"].Value).ToString(), ((float)item["value"].Value).ToString().Replace(',', '.'), ((long)item["type"].Value).ToString(), ((long)item["product"]["id"].Value).ToString()));
+                            gönderilenVeriUzunluğu += Rows[Rows.Count - 1].Length;
+                        }
+                        if (gönderilenVeriUzunluğu > ((veritabanı.gönderilenPaketBoyutu-1) * 1024 * 1024))
+                        {
+                            sCommand.Append(string.Join(",", Rows));
+                            sCommand.Append(";");
+                            cmd.CommandText = sCommand.ToString();
+                            cmd.CommandType = CommandType.Text;
+                            cmd.ExecuteNonQuery();
+                            Rows.Clear();
+                            sCommand = new StringBuilder("INSERT INTO " + tabloAdı + "(id, value, type, productId) VALUES ");
+                        }
+                    }
+                    else page--;
+                }
+            }
+            if (Rows.Count > 0)
+            {
+                sCommand.Append(string.Join(",", Rows));
+                sCommand.Append(";");
+                cmd.CommandText = sCommand.ToString();
+                cmd.CommandType = CommandType.Text;
+                cmd.ExecuteNonQuery();
+            }
+            con.Close();
+            TimeSpan geçen = DateTime.Now.Subtract(t_Start);
+            l.Text = "İşlem Bitti. Geçen süre: " + (geçen.Days == 0 ? "" : geçen.Days.ToString() + " gün ") + (geçen.Hours == 0 ? "" : geçen.Hours.ToString() + " saat ") + (geçen.Minutes == 0 ? "" : geçen.Minutes.ToString() + " dakika ") + (geçen.Seconds == 0 ? "" : geçen.Seconds.ToString() + " saniye") + " SON PAGE=" + page.ToString();
+        }
+
+        public static bool verileriÇek(System.Windows.Forms.Label l) //ideaSoft tan
+        {
+            if (T_veriÇekme != null) if (T_veriÇekme.IsAlive) return false;
+            MySqlConnection con = new MySqlConnection(veritabanı.connectionString);
+            con.Open();
+            if (veritabanı.tabloVarmı(tabloAdı, con)) veritabanı.tabloyuBoşalt(tabloAdı, con);
+            else veritabanı.tabloOluştur_withoutId(tabloAdı, tabloYapısı, con);
+            Thread_Apiİşlemleri.işEkle(T_veriÇekme = new Thread(() => _verileriÇek(con, l)));
+            T_veriÇekme.Start();
+            return true;
+        }
+    }
+    public class Nesne_detail
+    {
+        public int id;
+        public string sku;
+        public string details;
+        public int productId;
+
+        public static string tabloAdı = "detail";
+        public static Thread T_veriÇekme; //ideasoft tan
+        public static Thread T_veriYazma; //ideasoft a
+
+        public static string tabloYapısı { get { return "id INT(11), sku VARCHAR(75), details TEXT, productId INT(11)"; } }
+
+        public static void _verileriÇek(MySqlConnection con, System.Windows.Forms.Label l)
+        {
+            DateTime t_Start = DateTime.Now;
+            int page = 0;
+            IRestResponse data;
+            bool devam = true;
+            StringBuilder sCommand = new StringBuilder("INSERT INTO " + tabloAdı + "(id, sku, details, productId) VALUES ");
+            List<string> Rows = new List<string>();
+            int gönderilenVeriUzunluğu = 0;
+            MySqlCommand cmd = new MySqlCommand();
+            cmd.Connection = con;
+            int bekleme;
+            while (devam)
+            {
+                page++;
+                int tekrar = 0;
+                bekleme = Thread_Apiİşlemleri.bekleme;
+                do
+                {
+                    l.Text = "limit=100 page=" + page.ToString() + "     veri çekiliyor..(Bekleme: " + bekleme.ToString() + ")";
+                    Thread.Sleep(bekleme);
+                    data = Entegrasyon.GET("product_details", "limit=100&page=" + page.ToString());
+                    if (devam = data.IsSuccessful) break;
+                    else
+                    {
+                        bekleme *= Thread_Apiİşlemleri.tekrarÇarpan;
+                        tekrar++;
+                    }
+                } while (tekrar < Thread_Apiİşlemleri.tekrar);
+                if (devam)
+                {
+                    l.Text += page.ToString() + "   " + data.StatusCode.ToString();
+                    dynamic d = JsonConvert.DeserializeObject(data.Content);
+                    if (devam = (d.Count > 0))
+                    {
+                        foreach (var item in d)
+                        {
+                            Rows.Add(string.Format("({0},'{1}','{2}',{3})", ((long)item["id"].Value).ToString(), (string)item["sku"].Value, ((string)item["details"].Value).Replace("'", "\\'"), ((long)item["product"]["id"].Value).ToString()));
+                            gönderilenVeriUzunluğu += Rows[Rows.Count - 1].Length;
+                        }
+                        if (gönderilenVeriUzunluğu > ((veritabanı.gönderilenPaketBoyutu - 1) * 1024 * 1024))
+                        {
+                            sCommand.Append(string.Join(",", Rows));
+                            sCommand.Append(";");
+                            cmd.CommandText = sCommand.ToString();
+                            cmd.CommandType = CommandType.Text;
+                            cmd.ExecuteNonQuery();
+                            Rows.Clear();
+                            sCommand = new StringBuilder("INSERT INTO " + tabloAdı + "(id, sku, details, productId) VALUES ");
+                        }
+                    }
+                    else page--;
+                }
+            }
+            if (Rows.Count > 0)
+            {
+                sCommand.Append(string.Join(",", Rows));
+                sCommand.Append(";");
+                cmd.CommandText = sCommand.ToString();
+                cmd.CommandType = CommandType.Text;
+                cmd.ExecuteNonQuery();
+            }
+            con.Close();
+            TimeSpan geçen = DateTime.Now.Subtract(t_Start);
+            l.Text = "İşlem Bitti. Geçen süre: " + (geçen.Days == 0 ? "" : geçen.Days.ToString() + " gün ") + (geçen.Hours == 0 ? "" : geçen.Hours.ToString() + " saat ") + (geçen.Minutes == 0 ? "" : geçen.Minutes.ToString() + " dakika ") + (geçen.Seconds == 0 ? "" : geçen.Seconds.ToString() + " saniye") + " SON PAGE=" + page.ToString();
+        }
+
+        public static bool verileriÇek(System.Windows.Forms.Label l) //ideaSoft tan
+        {
+            if (T_veriÇekme != null) if (T_veriÇekme.IsAlive) return false;
+            MySqlConnection con = new MySqlConnection(veritabanı.connectionString);
+            con.Open();
+            if (veritabanı.tabloVarmı(tabloAdı, con)) veritabanı.tabloyuBoşalt(tabloAdı, con);
+            else veritabanı.tabloOluştur_withoutId(tabloAdı, tabloYapısı, con);
+            Thread_Apiİşlemleri.işEkle(T_veriÇekme = new Thread(() => _verileriÇek(con, l)));
+            T_veriÇekme.Start();
+            return true;
+        }
+    }
+    public class Nesne_category
+    {
+        public int id;
+        public string name;
+        public string slug;
+        public int sortOrder;
+        public string distributorCode;
+        public string distributor;
+        public string imageFile;
+        public string metaKeywords;
+        public string metaDescription;
+        public string pageTitle;
+        public int ParentId; 
+
+        public static string tabloAdı = "category";
+        public static Thread T_veriÇekme; //ideasoft tan
+        public static Thread T_veriYazma; //ideasoft a
+
+        public static string tabloYapısı { get { return "id INT(11), name TINYTEXT, slug TINYTEXT, sortOrder INT(3),  distributorCode TINYTEXT, distributor TINYTEXT, imageFile TINYTEXT, metaKeywords TINYTEXT, metaDescription TINYTEXT, pageTitle TINYTEXT, parentId INT(11)"; } }
+
+        public static void _verileriÇek(MySqlConnection con, System.Windows.Forms.Label l)
+        {
+            DateTime t_Start = DateTime.Now;
+            int page = 0;
+            IRestResponse data;
+            bool devam = true;
+            StringBuilder sCommand = new StringBuilder("INSERT INTO " + tabloAdı + "(id, name, slug, sortOrder, distributorCode, distributor, imageFile, metaKeywords, metaDescription, pageTitle, parentId) VALUES ");
+            List<string> Rows = new List<string>();
+            int gönderilenVeriUzunluğu = 0;
+            MySqlCommand cmd = new MySqlCommand();
+            cmd.Connection = con;
+            int bekleme;
+            while (devam)
+            {
+                page++;
+                int tekrar = 0;
+                bekleme = Thread_Apiİşlemleri.bekleme;
+                do
+                {
+                    l.Text = "limit=100 page=" + page.ToString() + "     veri çekiliyor..(Bekleme: " + bekleme.ToString() + ")";
+                    Thread.Sleep(bekleme);
+                    data = Entegrasyon.GET("categories", "limit=100&page=" + page.ToString());
+                    if (devam = data.IsSuccessful) break;
+                    else
+                    {
+                        bekleme *= Thread_Apiİşlemleri.tekrarÇarpan;
+                        tekrar++;
+                    }
+                } while (tekrar < Thread_Apiİşlemleri.tekrar);
+                if (devam)
+                {
+                    l.Text += page.ToString() + "   " + data.StatusCode.ToString();
+                    dynamic d = JsonConvert.DeserializeObject(data.Content);
+                    if (devam = (d.Count > 0))
+                    {
+                        foreach (var item in d)
+                        {
+                            Rows.Add(string.Format("({0},'{1}','{2}',{3},'{4}','{5}','{6}','{7}','{8}','{9}',{10})", ((long)item["id"].Value).ToString(), ((string)item["name"].Value).Replace("'", "\\'"), ((string)item["slug"].Value).Replace("'", "\\'"), ((long)item["sortOrder"].Value).ToString(), (string)item["distributorCode"].Value, (string)item["distributor"].Value, (string)item["imageFile"].Value, ((string)item["metaKeywords"].Value).Replace("'", "\\'"), ((string)item["metaDescription"].Value).Replace("'", "\\'"), ((string)item["pageTitle"].Value).Replace("'", "\\'"), (item["parent"]==null?"NULL":((long)item["parent"]["id"].Value).ToString())));
+                            gönderilenVeriUzunluğu += Rows[Rows.Count - 1].Length;
+                        }
+                        if (gönderilenVeriUzunluğu > ((veritabanı.gönderilenPaketBoyutu - 1) * 1024 * 1024))
+                        {
+                            sCommand.Append(string.Join(",", Rows));
+                            sCommand.Append(";");
+                            cmd.CommandText = sCommand.ToString();
+                            cmd.CommandType = CommandType.Text;
+                            cmd.ExecuteNonQuery();
+                            Rows.Clear();
+                            sCommand = new StringBuilder("INSERT INTO " + tabloAdı + "(id, name, slug, sortOrder, distributorCode, distributor, imageFile, metaKeywords, metaDescription, pageTitle, parentId) VALUES ");
+                        }
+                    }
+                    else page--;
+                }
+            }
+            if (Rows.Count > 0)
+            {
+                sCommand.Append(string.Join(",", Rows));
+                sCommand.Append(";");
+                cmd.CommandText = sCommand.ToString();
+                cmd.CommandType = CommandType.Text;
+                cmd.ExecuteNonQuery();
+            }
+            con.Close();
+            TimeSpan geçen = DateTime.Now.Subtract(t_Start);
+            l.Text = "İşlem Bitti. Geçen süre: " + (geçen.Days == 0 ? "" : geçen.Days.ToString() + " gün ") + (geçen.Hours == 0 ? "" : geçen.Hours.ToString() + " saat ") + (geçen.Minutes == 0 ? "" : geçen.Minutes.ToString() + " dakika ") + (geçen.Seconds == 0 ? "" : geçen.Seconds.ToString() + " saniye") + " SON PAGE=" + page.ToString();
+        }
+
+        public static bool verileriÇek(System.Windows.Forms.Label l) //ideaSoft tan
+        {
+            if (T_veriÇekme != null) if (T_veriÇekme.IsAlive) return false;
+            MySqlConnection con = new MySqlConnection(veritabanı.connectionString);
+            con.Open();
+            if (veritabanı.tabloVarmı(tabloAdı, con)) veritabanı.tabloyuBoşalt(tabloAdı, con);
+            else veritabanı.tabloOluştur_withoutId(tabloAdı, tabloYapısı, con);
+            Thread_Apiİşlemleri.işEkle(T_veriÇekme = new Thread(() => _verileriÇek(con, l)));
+            T_veriÇekme.Start();
+            return true;
+        }
+    }
+    public class Nesne_product_to_categories
+    {
+        public int id;
+        public int sortOrder;
+        public int productId;
+        public int categoryId;
+
+        public static string tabloAdı = "product_to_categories";
+        public static Thread T_veriÇekme; //ideasoft tan
+        public static Thread T_veriYazma; //ideasoft a
+
+        public static string tabloYapısı { get { return "id INT(11), sortOrder INT(4), productId INT(11), categoryId INT(11)"; } }
+
+        public static void _verileriÇek(MySqlConnection con, System.Windows.Forms.Label l)
+        {
+            DateTime t_Start = DateTime.Now;
+            int page = 0;
+            IRestResponse data;
+            bool devam = true;
+            StringBuilder sCommand = new StringBuilder("INSERT INTO " + tabloAdı + "(id, sortOrder, productId, categoryId) VALUES ");
+            List<string> Rows = new List<string>();
+            int gönderilenVeriUzunluğu = 0;
+            MySqlCommand cmd = new MySqlCommand();
+            cmd.Connection = con;
+            int bekleme;
+            while (devam)
+            {
+                page++;
+                int tekrar = 0;
+                bekleme = Thread_Apiİşlemleri.bekleme;
+                do
+                {
+                    l.Text = "limit=100 page=" + page.ToString() + "     veri çekiliyor..(Bekleme: " + bekleme.ToString() + ")";
+                    Thread.Sleep(bekleme);
+                    data = Entegrasyon.GET("product_to_categories", "limit=100&page=" + page.ToString());
+                    if (devam = data.IsSuccessful) break;
+                    else
+                    {
+                        bekleme *= Thread_Apiİşlemleri.tekrarÇarpan;
+                        tekrar++;
+                    }
+                } while (tekrar < Thread_Apiİşlemleri.tekrar);
+                if (devam)
+                {
+                    l.Text += page.ToString() + "   " + data.StatusCode.ToString();
+                    dynamic d = JsonConvert.DeserializeObject(data.Content);
+                    if (devam = (d.Count > 0))
+                    {
+                        foreach (var item in d)
+                        {
+                            Rows.Add(string.Format("({0},{1},{2},{3})", ((long)item["id"].Value).ToString(), ((long)item["sortOrder"].Value).ToString(), ((long)item["product"]["id"].Value).ToString(), ((long)item["category"]["id"].Value).ToString()));
+                            gönderilenVeriUzunluğu += Rows[Rows.Count - 1].Length;
+                        }
+                        if (gönderilenVeriUzunluğu > ((veritabanı.gönderilenPaketBoyutu - 1) * 1024 * 1024))
+                        {
+                            sCommand.Append(string.Join(",", Rows));
+                            sCommand.Append(";");
+                            cmd.CommandText = sCommand.ToString();
+                            cmd.CommandType = CommandType.Text;
+                            cmd.ExecuteNonQuery();
+                            Rows.Clear();
+                            sCommand = new StringBuilder("INSERT INTO " + tabloAdı + "(id, sortOrder, productId, categoryId) VALUES ");
+                        }
+                    }
+                    else page--;
+                }
+            }
+            if (Rows.Count > 0)
+            {
+                sCommand.Append(string.Join(",", Rows));
+                sCommand.Append(";");
+                cmd.CommandText = sCommand.ToString();
+                cmd.CommandType = CommandType.Text;
+                cmd.ExecuteNonQuery();
+            }
+            con.Close();
+            TimeSpan geçen = DateTime.Now.Subtract(t_Start);
+            l.Text = "İşlem Bitti. Geçen süre: " + (geçen.Days == 0 ? "" : geçen.Days.ToString() + " gün ") + (geçen.Hours == 0 ? "" : geçen.Hours.ToString() + " saat ") + (geçen.Minutes == 0 ? "" : geçen.Minutes.ToString() + " dakika ") + (geçen.Seconds == 0 ? "" : geçen.Seconds.ToString() + " saniye") + " SON PAGE=" + page.ToString();
+        }
+
+        public static bool verileriÇek(System.Windows.Forms.Label l) //ideaSoft tan
+        {
+            if (T_veriÇekme != null) if (T_veriÇekme.IsAlive) return false;
+            MySqlConnection con = new MySqlConnection(veritabanı.connectionString);
+            con.Open();
+            if (veritabanı.tabloVarmı(tabloAdı, con)) veritabanı.tabloyuBoşalt(tabloAdı, con);
+            else veritabanı.tabloOluştur_withoutId(tabloAdı, tabloYapısı, con);
+            Thread_Apiİşlemleri.işEkle(T_veriÇekme = new Thread(() => _verileriÇek(con, l)));
+            T_veriÇekme.Start();
+            return true;
+        }
+    }
+    public class Nesne_product_image
+    {
+        public int id;
+        public string filename;
+        public string extension;
+        public int sortOrder;
+        public int productId;
+        public string attachment;
+
+        public static string tabloAdı = "product_image";
+        public static Thread T_veriÇekme; //ideasoft tan
+        public static Thread T_veriYazma; //ideasoft a
+
+        public static string tabloYapısı { get { return "id INT(11), filename TINYTEXT, extension VARCHAR(4), sortOrder INT(1), productId INT(11), attachment MEDIUMTEXT"; } }
+
+        public static void _verileriÇek(MySqlConnection con, System.Windows.Forms.Label l)
+        {
+            DateTime t_Start = DateTime.Now;
+            int page = 0;
+            IRestResponse data;
+            bool devam = true;
+            StringBuilder sCommand = new StringBuilder("INSERT INTO " + tabloAdı + "(id, filename, extension, sortOrder, productId, attachment) VALUES ");
+            List<string> Rows = new List<string>();
+            int gönderilenVeriUzunluğu = 0;
+            MySqlCommand cmd = new MySqlCommand();
+            cmd.Connection = con;
+            int bekleme;
+            while (devam)
+            {
+                page++;
+                int tekrar = 0;
+                bekleme = Thread_Apiİşlemleri.bekleme;
+                do
+                {
+                    l.Text = "limit=100 page=" + page.ToString() + "     veri çekiliyor..(Bekleme: " + bekleme.ToString() + ")";
+                    Thread.Sleep(bekleme);
+                    data = Entegrasyon.GET("product_images", "limit=100&page=" + page.ToString());
+                    if (devam = data.IsSuccessful) break;
+                    else
+                    {
+                        bekleme *= Thread_Apiİşlemleri.tekrarÇarpan;
+                        tekrar++;
+                    }
+                } while (tekrar < Thread_Apiİşlemleri.tekrar);
+                if (devam)
+                {
+                    l.Text += page.ToString() + "   " + data.StatusCode.ToString();
+                    dynamic d = JsonConvert.DeserializeObject(data.Content);
+                    if (devam = (d.Count > 0))
+                    {
+                        foreach (var item in d)
+                        {
+                            Rows.Add(string.Format("({0},'{1}','{2}',{3},{4},'{5}')", ((long)item["id"].Value).ToString(), ((string)item["filename"].Value).Replace("'", "\\'"), (string)item["extension"].Value, ((long)item["sortOrder"].Value).ToString(), ((long)item["product"]["id"].Value).ToString(), item["attachment"] == null ? "" : ((string)item["attachment"].Value).Replace("'", "\\'")));
+                            gönderilenVeriUzunluğu += Rows[Rows.Count - 1].Length;
+                        }
+                        if (gönderilenVeriUzunluğu > ((veritabanı.gönderilenPaketBoyutu - 1) * 1024 * 1024))
+                        {
+                            sCommand.Append(string.Join(",", Rows));
+                            sCommand.Append(";");
+                            cmd.CommandText = sCommand.ToString();
+                            cmd.CommandType = CommandType.Text;
+                            cmd.ExecuteNonQuery();
+                            Rows.Clear();
+                            sCommand = new StringBuilder("INSERT INTO " + tabloAdı + "(id, filename, extension, sortOrder, productId, attachment) VALUES ");
+                        }
+                    }
+                    else page--;
+                }
+            }
+            if (Rows.Count > 0)
+            {
+                sCommand.Append(string.Join(",", Rows));
+                sCommand.Append(";");
+                cmd.CommandText = sCommand.ToString();
+                cmd.CommandType = CommandType.Text;
+                cmd.ExecuteNonQuery();
+            }
+            con.Close();
+            TimeSpan geçen = DateTime.Now.Subtract(t_Start);
+            l.Text = "İşlem Bitti. Geçen süre: " + (geçen.Days == 0 ? "" : geçen.Days.ToString() + " gün ") + (geçen.Hours == 0 ? "" : geçen.Hours.ToString() + " saat ") + (geçen.Minutes == 0 ? "" : geçen.Minutes.ToString() + " dakika ") + (geçen.Seconds == 0 ? "" : geçen.Seconds.ToString() + " saniye") + " SON PAGE=" + page.ToString();
+        }
+
+        public static bool verileriÇek(System.Windows.Forms.Label l) //ideaSoft tan
+        {
+            if (T_veriÇekme != null) if (T_veriÇekme.IsAlive) return false;
+            MySqlConnection con = new MySqlConnection(veritabanı.connectionString);
+            con.Open();
+            if (veritabanı.tabloVarmı(tabloAdı, con)) veritabanı.tabloyuBoşalt(tabloAdı, con);
+            else veritabanı.tabloOluştur_withoutId(tabloAdı, tabloYapısı, con);
+            Thread_Apiİşlemleri.işEkle(T_veriÇekme = new Thread(() => _verileriÇek(con, l)));
+            T_veriÇekme.Start();
+            return true;
+        }
+    }
+    public class Nesne_purchase_limitations
+    {
+        public int id;
+        public string name;
+        public int minimumLimit;
+        public int maximumLimit;
+        public string type;
+        public bool status;
+
+        public static string tabloAdı = "purchase_limitations";
+        public static Thread T_veriÇekme; //ideasoft tan
+        public static Thread T_veriYazma; //ideasoft a
+
+        public static string tabloYapısı { get { return "id INT(11), name TINYTEXT, minimumLimit INT(4), maximumLimit INT(4), type VARCHAR(10), status VARCHAR(1)"; } }
+
+        public static void _verileriÇek(MySqlConnection con, System.Windows.Forms.Label l)
+        {
+            DateTime t_Start = DateTime.Now;
+            int page = 0;
+            IRestResponse data;
+            bool devam = true;
+            StringBuilder sCommand = new StringBuilder("INSERT INTO " + tabloAdı + "(id, name, minimumLimit, maximumLimit, type, status) VALUES ");
+            List<string> Rows = new List<string>();
+            int gönderilenVeriUzunluğu = 0;
+            MySqlCommand cmd = new MySqlCommand();
+            cmd.Connection = con;
+            int bekleme;
+            while (devam)
+            {
+                page++;
+                int tekrar = 0;
+                bekleme = Thread_Apiİşlemleri.bekleme;
+                do
+                {
+                    l.Text = "limit=100 page=" + page.ToString() + "     veri çekiliyor..(Bekleme: " + bekleme.ToString() + ")";
+                    Thread.Sleep(bekleme);
+                    data = Entegrasyon.GET("purchase_limitations", "limit=100&page=" + page.ToString());
+                    if (devam = data.IsSuccessful) break;
+                    else
+                    {
+                        bekleme *= Thread_Apiİşlemleri.tekrarÇarpan;
+                        tekrar++;
+                    }
+                } while (tekrar < Thread_Apiİşlemleri.tekrar);
+                if (devam)
+                {
+                    l.Text += page.ToString() + "   " + data.StatusCode.ToString();
+                    dynamic d = JsonConvert.DeserializeObject(data.Content);
+                    if (devam = (d.Count > 0))
+                    {
+                        foreach (var item in d)
+                        {
+                            Rows.Add(string.Format("({0},'{1}',{2},{3},'{4}','{5}')", ((long)item["id"].Value).ToString(), (string)item["name"].Value, ((long)item["minimumLimit"].Value).ToString(), ((long)item["maximumLimit"].Value).ToString(), (string)item["type"].Value, (bool)item["status"].Value ? "1" : "0"));
+                            gönderilenVeriUzunluğu += Rows[Rows.Count - 1].Length;
+                        }
+                        if (gönderilenVeriUzunluğu > ((veritabanı.gönderilenPaketBoyutu - 1) * 1024 * 1024))
+                        {
+                            sCommand.Append(string.Join(",", Rows));
+                            sCommand.Append(";");
+                            cmd.CommandText = sCommand.ToString();
+                            cmd.CommandType = CommandType.Text;
+                            cmd.ExecuteNonQuery();
+                            Rows.Clear();
+                            sCommand = new StringBuilder("INSERT INTO " + tabloAdı + "(id, name, minimumLimit, maximumLimit, type, status) VALUES ");
+                        }
+                    }
+                    else page--;
+                }
+            }
+            if (Rows.Count > 0)
+            {
+                sCommand.Append(string.Join(",", Rows));
+                sCommand.Append(";");
+                cmd.CommandText = sCommand.ToString();
+                cmd.CommandType = CommandType.Text;
+                cmd.ExecuteNonQuery();
+            }
+            con.Close();
+            TimeSpan geçen = DateTime.Now.Subtract(t_Start);
+            l.Text = "İşlem Bitti. Geçen süre: " + (geçen.Days == 0 ? "" : geçen.Days.ToString() + " gün ") + (geçen.Hours == 0 ? "" : geçen.Hours.ToString() + " saat ") + (geçen.Minutes == 0 ? "" : geçen.Minutes.ToString() + " dakika ") + (geçen.Seconds == 0 ? "" : geçen.Seconds.ToString() + " saniye") + " SON PAGE=" + page.ToString();
+        }
+
+        public static bool verileriÇek(System.Windows.Forms.Label l) //ideaSoft tan
+        {
+            if (T_veriÇekme != null) if (T_veriÇekme.IsAlive) return false;
+            MySqlConnection con = new MySqlConnection(veritabanı.connectionString);
+            con.Open();
+            if (veritabanı.tabloVarmı(tabloAdı, con)) veritabanı.tabloyuBoşalt(tabloAdı, con);
+            else veritabanı.tabloOluştur_withoutId(tabloAdı, tabloYapısı, con);
+            Thread_Apiİşlemleri.işEkle(T_veriÇekme = new Thread(() => _verileriÇek(con, l)));
+            T_veriÇekme.Start();
+            return true;
+        }
+    }
+    public class Nesne_purchase_limitation_items
+    {
+        public int id;
+        public int limitationId;
+        public int productId;
+
+        public static string tabloAdı = "purchase_limitation_items";
+        public static Thread T_veriÇekme; //ideasoft tan
+        public static Thread T_veriYazma; //ideasoft a
+
+        public static string tabloYapısı { get { return "id INT(11), limitationId INT(11), productId INT(11)"; } }
+
+        public static void _verileriÇek(MySqlConnection con, System.Windows.Forms.Label l)
+        {
+            DateTime t_Start = DateTime.Now;
+            int page = 0;
+            IRestResponse data;
+            bool devam = true;
+            StringBuilder sCommand = new StringBuilder("INSERT INTO " + tabloAdı + "(id, limitationId, productId) VALUES ");
+            List<string> Rows = new List<string>();
+            int gönderilenVeriUzunluğu = 0;
+            MySqlCommand cmd = new MySqlCommand();
+            cmd.Connection = con;
+            int bekleme;
+            while (devam)
+            {
+                page++;
+                int tekrar = 0;
+                bekleme = Thread_Apiİşlemleri.bekleme;
+                do
+                {
+                    l.Text = "limit=100 page=" + page.ToString() + "     veri çekiliyor..(Bekleme: " + bekleme.ToString() + ")";
+                    Thread.Sleep(bekleme);
+                    data = Entegrasyon.GET("purchase_limitation_items", "limit=100&page=" + page.ToString());
+                    if (devam = data.IsSuccessful) break;
+                    else
+                    {
+                        bekleme *= Thread_Apiİşlemleri.tekrarÇarpan;
+                        tekrar++;
+                    }
+                } while (tekrar < Thread_Apiİşlemleri.tekrar);
+                if (devam)
+                {
+                    l.Text += page.ToString() + "   " + data.StatusCode.ToString();
+                    dynamic d = JsonConvert.DeserializeObject(data.Content);
+                    if (devam = (d.Count > 0))
+                    {
+                        foreach (var item in d)
+                        {
+                            Rows.Add(string.Format("({0},{1},{2})", ((long)item["id"].Value).ToString(), ((long)item["limitation"]["id"].Value).ToString(), ((long)item["product"]["id"].Value).ToString()));
+                            gönderilenVeriUzunluğu += Rows[Rows.Count - 1].Length;
+                        }
+                        if (gönderilenVeriUzunluğu > ((veritabanı.gönderilenPaketBoyutu - 1) * 1024 * 1024))
+                        {
+                            sCommand.Append(string.Join(",", Rows));
+                            sCommand.Append(";");
+                            cmd.CommandText = sCommand.ToString();
+                            cmd.CommandType = CommandType.Text;
+                            cmd.ExecuteNonQuery();
+                            Rows.Clear();
+                            sCommand = new StringBuilder("INSERT INTO " + tabloAdı + "(id, limitationId, productId) VALUES ");
+                        }
+                    }
+                    else page--;
+                }
+            }
+            if (Rows.Count > 0)
+            {
+                sCommand.Append(string.Join(",", Rows));
+                sCommand.Append(";");
+                cmd.CommandText = sCommand.ToString();
+                cmd.CommandType = CommandType.Text;
+                cmd.ExecuteNonQuery();
+            }
+            con.Close();
+            TimeSpan geçen = DateTime.Now.Subtract(t_Start);
+            l.Text = "İşlem Bitti. Geçen süre: " + (geçen.Days == 0 ? "" : geçen.Days.ToString() + " gün ") + (geçen.Hours == 0 ? "" : geçen.Hours.ToString() + " saat ") + (geçen.Minutes == 0 ? "" : geçen.Minutes.ToString() + " dakika ") + (geçen.Seconds == 0 ? "" : geçen.Seconds.ToString() + " saniye") + " SON PAGE=" + page.ToString();
+        }
+
+        public static bool verileriÇek(System.Windows.Forms.Label l) //ideaSoft tan
+        {
+            if (T_veriÇekme != null) if (T_veriÇekme.IsAlive) return false;
+            MySqlConnection con = new MySqlConnection(veritabanı.connectionString);
+            con.Open();
+            if (veritabanı.tabloVarmı(tabloAdı, con)) veritabanı.tabloyuBoşalt(tabloAdı, con);
+            else veritabanı.tabloOluştur_withoutId(tabloAdı, tabloYapısı, con);
+            Thread_Apiİşlemleri.işEkle(T_veriÇekme = new Thread(() => _verileriÇek(con, l)));
+            T_veriÇekme.Start();
+            return true;
+        }
+    }
+    public class Nesne_tags
+    {
+        public int id;
+        public string name;
+        public int count;
+        public string metaKeywords;
+        public string metaDescription;
+        public string pageTitle;
+
+        public static string tabloAdı = "tags";
+        public static Thread T_veriÇekme; //ideasoft tan
+        public static Thread T_veriYazma; //ideasoft a
+
+        public static string tabloYapısı { get { return "id INT(11), name TINYTEXT, count INT(3), metaKeywords TEXT, metaDescription TEXT, pageTitle TEXT"; } }
+
+        public static void _verileriÇek(MySqlConnection con, System.Windows.Forms.Label l)
+        {
+            DateTime t_Start = DateTime.Now;
+            int page = 0;
+            IRestResponse data;
+            bool devam = true;
+            StringBuilder sCommand = new StringBuilder("INSERT INTO " + tabloAdı + "(id, name, count, metaKeywords, metaDescription, pageTitle) VALUES ");
+            List<string> Rows = new List<string>();
+            int gönderilenVeriUzunluğu = 0;
+            MySqlCommand cmd = new MySqlCommand();
+            cmd.Connection = con;
+            int bekleme;
+            while (devam)
+            {
+                page++;
+                int tekrar = 0;
+                bekleme = Thread_Apiİşlemleri.bekleme;
+                do
+                {
+                    l.Text = "limit=100 page=" + page.ToString() + "     veri çekiliyor..(Bekleme: " + bekleme.ToString() + ")";
+                    Thread.Sleep(bekleme);
+                    data = Entegrasyon.GET("tags", "limit=100&page=" + page.ToString());
+                    if (devam = data.IsSuccessful) break;
+                    else
+                    {
+                        bekleme *= Thread_Apiİşlemleri.tekrarÇarpan;
+                        tekrar++;
+                    }
+                } while (tekrar < Thread_Apiİşlemleri.tekrar);
+                if (devam)
+                {
+                    l.Text += page.ToString() + "   " + data.StatusCode.ToString();
+                    dynamic d = JsonConvert.DeserializeObject(data.Content);
+                    if (devam = (d.Count > 0))
+                    {
+                        foreach (var item in d)
+                        {
+                            Rows.Add(string.Format("({0},'{1}',{2},'{3}','{4}','{5}')", ((long)item["id"].Value).ToString(), ((string)item["name"].Value).Replace("'", "\\'"), ((long)item["count"].Value).ToString(), ((string)item["metaKeywords"].Value).Replace("'", "\\'"), ((string)item["metaDescription"].Value).Replace("'", "\\'"), ((string)item["pageTitle"].Value).Replace("'", "\\'")));
+                            gönderilenVeriUzunluğu += Rows[Rows.Count - 1].Length;
+                        }
+                        if (gönderilenVeriUzunluğu > ((veritabanı.gönderilenPaketBoyutu - 1) * 1024 * 1024))
+                        {
+                            sCommand.Append(string.Join(",", Rows));
+                            sCommand.Append(";");
+                            cmd.CommandText = sCommand.ToString();
+                            cmd.CommandType = CommandType.Text;
+                            cmd.ExecuteNonQuery();
+                            Rows.Clear();
+                            sCommand = new StringBuilder("INSERT INTO " + tabloAdı + "(id, name, count, metaKeywords, metaDescription, pageTitle) VALUES ");
+                        }
+                    }
+                    else page--;
+                }
+            }
+            if (Rows.Count > 0)
+            {
+                sCommand.Append(string.Join(",", Rows));
+                sCommand.Append(";");
+                cmd.CommandText = sCommand.ToString();
+                cmd.CommandType = CommandType.Text;
+                cmd.ExecuteNonQuery();
+            }
+            con.Close();
+            TimeSpan geçen = DateTime.Now.Subtract(t_Start);
+            l.Text = "İşlem Bitti. Geçen süre: " + (geçen.Days == 0 ? "" : geçen.Days.ToString() + " gün ") + (geçen.Hours == 0 ? "" : geçen.Hours.ToString() + " saat ") + (geçen.Minutes == 0 ? "" : geçen.Minutes.ToString() + " dakika ") + (geçen.Seconds == 0 ? "" : geçen.Seconds.ToString() + " saniye") + " SON PAGE=" + page.ToString();
+        }
+
+        public static bool verileriÇek(System.Windows.Forms.Label l) //ideaSoft tan
+        {
+            if (T_veriÇekme != null) if (T_veriÇekme.IsAlive) return false;
+            MySqlConnection con = new MySqlConnection(veritabanı.connectionString);
+            con.Open();
+            if (veritabanı.tabloVarmı(tabloAdı, con)) veritabanı.tabloyuBoşalt(tabloAdı, con);
+            else veritabanı.tabloOluştur_withoutId(tabloAdı, tabloYapısı, con);
+            Thread_Apiİşlemleri.işEkle(T_veriÇekme = new Thread(() => _verileriÇek(con, l)));
+            T_veriÇekme.Start();
+            return true;
+        }
+    }
+    public class Nesne_product_to_tags
+    {
+        public int id;
+        public int productId;
+        public int tagId;
+
+        public static string tabloAdı = "product_to_tags";
+        public static Thread T_veriÇekme; //ideasoft tan
+        public static Thread T_veriYazma; //ideasoft a
+
+        public static string tabloYapısı { get { return "id INT(11), productId INT(11), tagId INT(11)"; } }
+
+        public static void _verileriÇek(MySqlConnection con, System.Windows.Forms.Label l)
+        {
+            DateTime t_Start = DateTime.Now;
+            int page = 0;
+            IRestResponse data;
+            bool devam = true;
+            StringBuilder sCommand = new StringBuilder("INSERT INTO " + tabloAdı + "(id, productId, tagId) VALUES ");
+            List<string> Rows = new List<string>();
+            int gönderilenVeriUzunluğu = 0;
+            MySqlCommand cmd = new MySqlCommand();
+            cmd.Connection = con;
+            int bekleme;
+            while (devam)
+            {
+                page++;
+                int tekrar = 0;
+                bekleme = Thread_Apiİşlemleri.bekleme;
+                do
+                {
+                    l.Text = "limit=100 page=" + page.ToString() + "     veri çekiliyor..(Bekleme: " + bekleme.ToString() + ")";
+                    Thread.Sleep(bekleme);
+                    data = Entegrasyon.GET("product_to_tags", "limit=100&page=" + page.ToString());
+                    if (devam = data.IsSuccessful) break;
+                    else
+                    {
+                        bekleme *= Thread_Apiİşlemleri.tekrarÇarpan;
+                        tekrar++;
+                    }
+                } while (tekrar < Thread_Apiİşlemleri.tekrar);
+                if (devam)
+                {
+                    l.Text += page.ToString() + "   " + data.StatusCode.ToString();
+                    dynamic d = JsonConvert.DeserializeObject(data.Content);
+                    if (devam = (d.Count > 0))
+                    {
+                        foreach (var item in d)
+                        {
+                            Rows.Add(string.Format("({0},{1},{2})", ((long)item["id"].Value).ToString(), ((long)item["product"]["id"].Value).ToString(), ((long)item["tag"]["id"].Value).ToString()));
+                            gönderilenVeriUzunluğu += Rows[Rows.Count - 1].Length;
+                        }
+                        if (gönderilenVeriUzunluğu > ((veritabanı.gönderilenPaketBoyutu - 1) * 1024 * 1024))
+                        {
+                            sCommand.Append(string.Join(",", Rows));
+                            sCommand.Append(";");
+                            cmd.CommandText = sCommand.ToString();
+                            cmd.CommandType = CommandType.Text;
+                            cmd.ExecuteNonQuery();
+                            Rows.Clear();
+                            sCommand = new StringBuilder("INSERT INTO " + tabloAdı + "(id, productId, tagId) VALUES ");
+                        }
+                    }
+                    else page--;
+                }
+            }
+            if (Rows.Count > 0)
+            {
+                sCommand.Append(string.Join(",", Rows));
+                sCommand.Append(";");
+                cmd.CommandText = sCommand.ToString();
+                cmd.CommandType = CommandType.Text;
+                cmd.ExecuteNonQuery();
+            }
+            con.Close();
+            TimeSpan geçen = DateTime.Now.Subtract(t_Start);
+            l.Text = "İşlem Bitti. Geçen süre: " + (geçen.Days == 0 ? "" : geçen.Days.ToString() + " gün ") + (geçen.Hours == 0 ? "" : geçen.Hours.ToString() + " saat ") + (geçen.Minutes == 0 ? "" : geçen.Minutes.ToString() + " dakika ") + (geçen.Seconds == 0 ? "" : geçen.Seconds.ToString() + " saniye") + " SON PAGE=" + page.ToString();
+        }
+
+        public static bool verileriÇek(System.Windows.Forms.Label l) //ideaSoft tan
+        {
+            if (T_veriÇekme != null) if (T_veriÇekme.IsAlive) return false;
+            MySqlConnection con = new MySqlConnection(veritabanı.connectionString);
+            con.Open();
+            if (veritabanı.tabloVarmı(tabloAdı, con)) veritabanı.tabloyuBoşalt(tabloAdı, con);
+            else veritabanı.tabloOluştur_withoutId(tabloAdı, tabloYapısı, con);
+            Thread_Apiİşlemleri.işEkle(T_veriÇekme = new Thread(() => _verileriÇek(con, l)));
+            T_veriÇekme.Start();
+            return true;
+        }
+    }
+    public class Nesne_product
+    {
+        public int id;
+        public string name;
+        public string slug;
+        public string fullName;
+        public string sku;
+        public string barcode;
+        public double price1;
+        public string distributor;
+        public double stockAmount;
+        public double buyingPrice;
+        public string stockTypeLabel;
+        public string metaKeywords;
+        public string metaDescription;
+        public string pageTitle;
+        public string searchKeywords;
+        public int brandId;
+        public int currencyId;
+        public int parentId;
+
+        public static string tabloAdı = "product";
+        public static Thread T_veriÇekme; //ideasoft tan
+        public static Thread T_veriYazma; //ideasoft a
+
+        public static string tabloYapısı { get { return "id INT(11), name TINYTEXT, slug TINYTEXT, fullName TINYTEXT, sku TINYTEXT, barcode TINYTEXT, price1 FLOAT, distributor VARCHAR(50), stockAmount FLOAT, buyingPrice FLOAT, stockTypeLabel VARCHAR(50), metaKeywords TEXT, metaDescription TEXT, pageTitle TEXT, searchKeywords TEXT, brandId INT(11), currencyId INT(11), parentId INT(11)"; } }
+
+        public static void _verileriÇek(MySqlConnection con, System.Windows.Forms.Label l)
+        {
+            DateTime t_Start = DateTime.Now;
+            int page = 0;
+            IRestResponse data;
+            bool devam = true;
+            StringBuilder sCommand = new StringBuilder("INSERT INTO " + tabloAdı + "(id, name, slug, fullName, sku, barcode, price1, distributor, stockAmount, buyingPrice, stockTypeLabel, metaKeywords, metaDescription, pageTitle, searchKeywords, brandId, currencyId, parentId) VALUES ");
+            List<string> Rows = new List<string>();
+            int gönderilenVeriUzunluğu = 0;
+            MySqlCommand cmd = new MySqlCommand();
+            cmd.Connection = con;
+            int bekleme;
+            while (devam)
+            {
+                page++;
+                int tekrar = 0;
+                bekleme = Thread_Apiİşlemleri.bekleme;
+                do
+                {
+                    l.Text = "limit=100 page=" + page.ToString() + "     veri çekiliyor..(Bekleme: " + bekleme.ToString() + ")";
+                    Thread.Sleep(bekleme);
+                    data = Entegrasyon.GET("products", "limit=100&page=" + page.ToString());
+                    if (devam = data.IsSuccessful) break;
+                    else
+                    {
+                        bekleme *= Thread_Apiİşlemleri.tekrarÇarpan;
+                        tekrar++;
+                    }
+                } while (tekrar < Thread_Apiİşlemleri.tekrar);
+                if (devam)
+                {
+                    l.Text += page.ToString() + "   " + data.StatusCode.ToString();
+                    dynamic d = JsonConvert.DeserializeObject(data.Content);
+                    if (devam = (d.Count > 0))
+                    {
+                        foreach (var item in d)
+                        {
+                            Rows.Add(string.Format("({0},'{1}','{2}','{3}','{4}','{5}',{6},'{7}',{8},{9},'{10}','{11}','{12}','{13}','{14}',{15},{16},{17})", ((long)item["id"].Value).ToString(), ((string)item["name"].Value).Replace("'", "\\'"), ((string)item["slug"].Value).Replace("'", "\\'"), ((string)item["fullName"].Value).Replace("'", "\\'"), ((string)item["sku"].Value).Replace("'", "\\'"), ((string)item["barcode"].Value).Replace("'", "\\'"), ((double)item["price1"].Value).ToString().Replace(',', '.'), (string)item["distributor"].Value, ((double)item["stockAmount"].Value).ToString().Replace(',', '.'), ((double)item["buyingPrice"].Value).ToString().Replace(',', '.'), ((string)item["stockTypeLabel"].Value).Replace("'", "\\'"), ((string)item["metaKeywords"].Value).Replace("'", "\\'"), ((string)item["metaDescription"].Value).Replace("'", "\\'"), ((string)item["pageTitle"].Value).Replace("'", "\\'"), ((string)item["searchKeywords"].Value).Replace("'", "\\'"), item["brand"] == null ? "NULL" : ((long)item["brand"]["id"].Value).ToString(), ((long)item["currency"]["id"].Value).ToString(), item["parent"] == null ? "NULL" : ((long)item["parent"]["id"].Value).ToString()));
+                            gönderilenVeriUzunluğu += Rows[Rows.Count - 1].Length;
+                        }
+                        if (gönderilenVeriUzunluğu > ((veritabanı.gönderilenPaketBoyutu - 1) * 1024 * 1024))
+                        {
+                            sCommand.Append(string.Join(",", Rows));
+                            sCommand.Append(";");
+                            cmd.CommandText = sCommand.ToString();
+                            cmd.CommandType = CommandType.Text;
+                            cmd.ExecuteNonQuery();
+                            Rows.Clear();
+                            sCommand = new StringBuilder("INSERT INTO " + tabloAdı + "(id, name, slug, fullName, sku, barcode, price1, distributor, stockAmount, buyingPrice, stockTypeLabel, metaKeywords, metaDescription, pageTitle, searchKeywords, brandId, currencyId, parentId) VALUES ");
+                        }
+                    }
+                    else page--;
+                }
+            }
+            if (Rows.Count > 0)
+            {
+                sCommand.Append(string.Join(",", Rows));
+                sCommand.Append(";");
+                cmd.CommandText = sCommand.ToString();
+                cmd.CommandType = CommandType.Text;
+                cmd.ExecuteNonQuery();
+            }
+            con.Close();
+            TimeSpan geçen = DateTime.Now.Subtract(t_Start);
+            l.Text = "İşlem Bitti. Geçen süre: " + (geçen.Days == 0 ? "" : geçen.Days.ToString() + " gün ") + (geçen.Hours == 0 ? "" : geçen.Hours.ToString() + " saat ") + (geçen.Minutes == 0 ? "" : geçen.Minutes.ToString() + " dakika ") + (geçen.Seconds == 0 ? "" : geçen.Seconds.ToString() + " saniye") + " SON PAGE=" + page.ToString();
+        }
+
+        public static bool verileriÇek(System.Windows.Forms.Label l) //ideaSoft tan
+        {
+            if (T_veriÇekme != null) if (T_veriÇekme.IsAlive) return false;
+            MySqlConnection con = new MySqlConnection(veritabanı.connectionString);
+            con.Open();
+            if (veritabanı.tabloVarmı(tabloAdı, con)) veritabanı.tabloyuBoşalt(tabloAdı, con);
+            else veritabanı.tabloOluştur_withoutId(tabloAdı, tabloYapısı, con);
+            Thread_Apiİşlemleri.işEkle(T_veriÇekme = new Thread(() => _verileriÇek(con, l)));
+            T_veriÇekme.Start();
+            return true;
+        }
+    }

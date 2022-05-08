@@ -1,0 +1,27 @@
+CREATE DEFINER=`root`@`localhost` FUNCTION `detailVer`(
+	`firma` VARCHAR(50),
+	`p1` TINYTEXT,
+	`p2` TINYTEXT,
+	`p3` TINYTEXT,
+	`p4` TINYTEXT,
+	`p5` TINYTEXT,
+	`p6` TINYTEXT,
+	`p7` TINYTEXT,
+	`p8` TINYTEXT,
+	`p9` TINYTEXT
+)
+RETURNS text CHARSET utf8
+LANGUAGE SQL
+DETERMINISTIC
+CONTAINS SQL
+SQL SECURITY DEFINER
+COMMENT ''
+BEGIN
+	DECLARE detay TEXT DEFAULT '';
+	if firma = 'motorasin' then
+		SET detay = CONCAT('<p>Stok Kodu: ',detayDegisim(p1),'</p><p>Stok Adı: ',detayDegisim(p2),'</p><p>Parça Markası: ',detayDegisim(p3),'</p><p>Önceki Kodu:</p><p>Araç: ',detayDegisim(p4),'&sol;',detayDegisim(p5),'</p><p>Ürün Grubu:</p><p>Ürün Tipi:</p><p>Oem Numarası: ',detayDegisim(p6),'</p><p>Eşdeğer Parça: </p>');
+	ELSEIF firma = 'dinamik' then
+		SET detay = CONCAT('<p>Stok Kodu: ',detayDegisim(p1),'</p><p>Stok Adı: ',detayDegisim(p2),'</p><p>Parça Markası: ',detayDegisim(p3),'</p><p>Önceki Kodu: ',detayDegisim(p4),'</p><p>Araç: ',detayDegisim(kull1A(p5)),'&sol;',detayDegisim(kull1B(p5)),'</p><p>Ürün Grubu: ',detayDegisim(p6),'</p><p>Ürün Tipi: ',detayDegisim(p7),'</p><p>Oem Numarası: ',detayDegisim(p8),'</p><p>Eşdeğer Parça: ',detayDegisim(p9),'</p>');
+	END if;
+	RETURN CONCAT('<span style=\"font-family: Tahoma, Geneva, sans-serif; font-size: 14pt\">',detay,'</span>');
+END

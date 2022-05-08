@@ -1,0 +1,1 @@
+1.	ideasoft api ile veri çekmede kullanýlan metodlar birleþtirilecek. ayný þey tekrar ediliyor.
