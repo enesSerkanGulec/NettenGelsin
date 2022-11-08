@@ -125,6 +125,8 @@
     <None Include="Resources\Ok-icon.png" />
     <None Include="Resources\check_all.bmp" />
     <None Include="Resources\check_all1.bmp" />
+    <None Include="Resources\Icon1.ico" />
+    <None Include="Resources\indir.png" />
     <Content Include="silinecekler.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
