@@ -1008,7 +1008,7 @@ namespace NettenGelsin
             MySqlConnection con = new MySqlConnection(veritabanı.connectionString);
             con.Open();
 
-            string cmdText = string.Format(işlem == işlemTipi.eklenecek ? ("SELECT ortak.*, 'E', '', if(slug.slug is null,'',slug.slug) from (ortak left join slug on ortak.stok_kodu=slug.sku) where stok_kodu not in (select stok_kodu from ideasoft)") : ("SELECT t.* FROM (SELECT ortak.*, durumNedir(ortak.stok_kodu, {0}, {1}, {2}) AS d, ideasoft.id as p_id, if (slug.slug is null,'',slug.slug) AS s FROM ((ortak inner join ideasoft on ortak.stok_kodu=ideasoft.stok_kodu) left join slug on ortak.stok_kodu = slug.sku)) AS t WHERE t.d <> 'E'{3}"), Entegrasyon.kurNedir("USD").ToString().Replace(',', '.'), Entegrasyon.kurNedir("EUR").ToString().Replace(',', '.'), 1, hepsiniGüncelle?"": " AND t.d <> 'Y' AND t.d <> 'I'");
+            string cmdText = string.Format(işlem == işlemTipi.eklenecek ? ("SELECT ortak.*, 'E', '', if(slug.slug is null,'',slug.slug) from (ortak left join slug on ortak.stok_kodu=slug.sku) where stok_kodu not in (select stok_kodu from ideasoft)") : ("SELECT t.* FROM (SELECT ortak.*, durumNedir(ortak.stok_kodu, {0}, {1}, {2}) AS d, ideasoft.id as p_id, if (slug.slug is null,'',slug.slug) AS s FROM ((ortak inner join ideasoft on ortak.stok_kodu=ideasoft.stok_kodu) left join slug on ortak.stok_kodu = slug.sku)) AS t WHERE t.d <> 'E'{3}"), Entegrasyon.kurNedir("USD").ToString().Replace(',', '.'), Entegrasyon.kurNedir("EUR").ToString().Replace(',', '.'), 3, hepsiniGüncelle?"": " AND t.d <> 'Y' AND t.d <> 'I'");
 
             MySqlCommand cmd = new MySqlCommand(cmdText, con);
             cmd.CommandTimeout = 600;

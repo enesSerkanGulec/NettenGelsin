@@ -320,8 +320,8 @@ namespace NettenGelsin
         public static string MotoraşinTabloYapısı = "ManufacturerCode VARCHAR(50), Name TINYTEXT, Manufacturer VARCHAR(50), Quantity VARCHAR(10), Price FLOAT, PriceCurrency VARCHAR(50), VehicleType VARCHAR(50), VehicleBrand VARCHAR(50), OrginalNo VARCHAR(50), Picture TEXT, MinOrder FLOAT, Pictures TEXT, IsNetPrice TEXT, CampaignPrice FLOAT, CampaignCurrency VARCHAR(50)";
         public static string MotoraşinTablosuIndexYapısı = "PRIMARY KEY (`id`) USING BTREE, INDEX `ManufacturerCode` (`ManufacturerCode`) USING BTREE, INDEX `Manufacturer` (`Manufacturer`) USING BTREE, INDEX `Name` (`Name`(63)) USING BTREE, INDEX `VehicleType` (`VehicleType`) USING BTREE, INDEX `VehicleBrand` (`VehicleBrand`) USING BTREE, INDEX `Price` (`Price`) USING BTREE, INDEX `MinOrder` (`MinOrder`) USING BTREE, INDEX `Picture` (`Picture`(100)) USING BTREE, INDEX `IsNetPrice` (`IsNetPrice`(50)) USING BTREE, INDEX `CampaignCurrency` (`CampaignCurrency`) USING BTREE, INDEX `CampaignPrice` (`CampaignPrice`) USING BTREE";
 
-        public static string DinamikTabloYapısı = "stok_kodu VARCHAR(75), stok_adi TEXT, marka VARCHAR(50), uretici_kodu VARCHAR(50), onceki_kod VARCHAR(50), kull1s VARCHAR(50), kull2s VARCHAR(50), kull3s VARCHAR(50), kull4s VARCHAR(50), kull5s VARCHAR(50), kull6s VARCHAR(50), kull7s VARCHAR(50), kull8s VARCHAR(150), resim_url TEXT, oem_liste TINYTEXT, esdegerListe TINYTEXT, fiyat FLOAT, varyok VARCHAR(5), barkod1 TINYTEXT, barkod2 TINYTEXT, barkod3 TINYTEXT, kampanyaOrani INT(2), paketMiktari INT(3), koliMiktari INT(3), olcuBirimi VARCHAR(10)";
-        public static string DinamikTablosuIndexYapısı = "PRIMARY KEY (`id`) USING BTREE,INDEX `stok_kodu` (`stok_kodu`) USING BTREE,INDEX `kull1s` (`kull1s`) USING BTREE,INDEX `kull7s` (`kull7s`) USING BTREE,INDEX `kull8s` (`kull8s`) USING BTREE,INDEX `marka` (`marka`) USING BTREE,INDEX `stok_adi` (`stok_adi`(63)) USING BTREE,INDEX `fiyat` (`fiyat`) USING BTREE,INDEX `varyok` (`varyok`) USING BTREE,INDEX `kampanyaOrani` (`kampanyaOrani`) USING BTREE,INDEX `paketMiktari` (`paketMiktari`) USING BTREE,INDEX `resim_url` (`resim_url`(50)) USING BTREE";
+        public static string DinamikTabloYapısı = "stok_kodu VARCHAR(75), stok_adi TEXT, marka VARCHAR(50), uretici_kodu VARCHAR(50), onceki_kod VARCHAR(50), kull1s VARCHAR(50), kull2s VARCHAR(50), kull3s VARCHAR(50), kull4s VARCHAR(50), kull5s VARCHAR(50), kull6s VARCHAR(50), kull7s VARCHAR(50), kull8s VARCHAR(150), resim_url TEXT, oem_liste TINYTEXT, esdegerListe TINYTEXT, fiyat FLOAT, varyok1 VARCHAR(5), varyok2 VARCHAR(5),varyok3 VARCHAR(5), barkod1 TINYTEXT, barkod2 TINYTEXT, barkod3 TINYTEXT, kampanyaOrani INT(2), paketMiktari INT(3), koliMiktari INT(3), olcuBirimi VARCHAR(10)";
+        public static string DinamikTablosuIndexYapısı = "PRIMARY KEY (`id`) USING BTREE,INDEX `stok_kodu` (`stok_kodu`) USING BTREE,INDEX `kull1s` (`kull1s`) USING BTREE,INDEX `kull7s` (`kull7s`) USING BTREE,INDEX `kull8s` (`kull8s`) USING BTREE,INDEX `marka` (`marka`) USING BTREE,INDEX `stok_adi` (`stok_adi`(63)) USING BTREE,INDEX `fiyat` (`fiyat`) USING BTREE,INDEX `varyok1` (`varyok1`) USING BTREE, INDEX `varyok2` (`varyok2`) USING BTREE, INDEX `varyok3` (`varyok3`) USING BTREE, INDEX `kampanyaOrani` (`kampanyaOrani`) USING BTREE,INDEX `paketMiktari` (`paketMiktari`) USING BTREE,INDEX `resim_url` (`resim_url`(50)) USING BTREE";
 
         //public static string SabitLabelTabloYapısı = "stok_kodu VARCHAR(75), label TEXT";
         //public static string SabitLabelTablosuIndexYapısı = "PRIMARY KEY (`id`) USING BTREE, INDEX `stok_kodu` (`stok_kodu`) USING BTREE";
@@ -698,6 +698,7 @@ create table {0} ({1}{2}) ENGINE=MyISAM;", tabloAdı, alanTanımlamaları, index
             MySqlCommand cmd = new MySqlCommand(string.Format("delete from ortak where {0}", s), con);
             cmd.CommandTimeout = 600;
             veritabanı.cmdExecute(cmd);
+            con.Close();
         }
         public static void icindeGecenlerinFiyatlariniArttir(string[] kelimeler, double artis, bool artisMiktariYuzdeMi = false)
         {
@@ -712,6 +713,7 @@ create table {0} ({1}{2}) ENGINE=MyISAM;", tabloAdı, alanTanımlamaları, index
             MySqlCommand cmd = new MySqlCommand(string.Format("update ortak set ortak.price={0} where {1}",string.Format("artmisFiyat(ortak.currency_abbr, ortak.price, {0}, {1}, {2}, {3})", artis,artisMiktariYuzdeMi?1:0, Entegrasyon.kurNedir("USD").ToString().Replace(',', '.'), Entegrasyon.kurNedir("EUR").ToString().Replace(',', '.')), s), con);
             cmd.CommandTimeout = 600;
             veritabanı.cmdExecute(cmd);
+            con.Close();
         }
 
 
@@ -960,6 +962,7 @@ create table {0} ({1}{2}) ENGINE=MyISAM;", tabloAdı, alanTanımlamaları, index
             MySqlCommand cmd = new MySqlCommand("CALL binekDuzeltme", con);
             cmd.CommandTimeout = 4800;
             cmdExecute(cmd);
+            con.Close();
         }
 
         public static void Başla()

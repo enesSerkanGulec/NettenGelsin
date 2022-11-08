@@ -81,6 +81,8 @@
     <Compile Include="veritabanıBilgileri.designer.cs">
       <DependentUpon>veritabanıBilgileri.cs</DependentUpon>
     </Compile>
+    <Compile Include="İşlem.cs" />
+    <Compile Include="İşlemlerTipi.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
       <SubType>Designer</SubType>

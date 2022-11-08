@@ -611,7 +611,7 @@ namespace NettenGelsin
                 price = "fiyatDinamik(fiyat)";
                 currencyabbr = "'TL'";
                 paketmiktarı = "paketMiktari";
-                stokamount = "stockAmountDinamik(varyok, paketMiktari)";
+                stokamount = "stockAmountDinamik(varyok1, varyok2, varyok3, paketMiktari)";
                 stoktype = "stockTypeDinamik(olcuBirimi)";
                 discount = "kampanyaOrani";
                 discounttype = "1";

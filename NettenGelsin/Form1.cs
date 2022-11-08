@@ -168,208 +168,31 @@ namespace NettenGelsin
 
             MySqlConnection con = new MySqlConnection(veritabanı.connectionString);
 
-            if (cb2.Checked)
+            İşlem işlem = new İşlem(label3, progressBar2, listBox2, listBox1, numericUpDown2, radioButton1, con);
+
+            if (cb2.Checked) işlem.Yap(İşlemler_Tipi.motoraşinVeriÇek);
+            if (cb3.Checked) işlem.Yap(İşlemler_Tipi.motoraşinDeğişim);
+            if (cb4.Checked) işlem.Yap(İşlemler_Tipi.motoraşinÇokluKayıtlarıSil);
+            if (cb5.Checked) işlem.Yap(İşlemler_Tipi.motoraşinOrtağaAktar);
+            if (cb6.Checked) işlem.Yap(İşlemler_Tipi.motoraşinResimleriİçeAktar);
+
+            if (cb7.Checked) işlem.Yap(İşlemler_Tipi.dinamikVerileriÇek);
+            if (cb8.Checked) işlem.Yap(İşlemler_Tipi.dinamikDeğişim);
+            if (cb9.Checked) işlem.Yap(İşlemler_Tipi.dinamikÇokluKayıtlarıSil);
+            if (cb10.Checked) işlem.Yap(İşlemler_Tipi.dinamikOrtağaAktar);
+            if (cb11.Checked) işlem.Yap(İşlemler_Tipi.dinamikResimleriİçeAktar);
+
+            if (cb12.Checked) işlem.Yap(İşlemler_Tipi.ortakTekrarlıKayıtlarınBilgileriniDinamiktekiGibiYap);
+            if (cb13.Checked) işlem.Yap(İşlemler_Tipi.ortak_TablosunuOluştur);
+            if (cb14.Checked) işlem.Yap(İşlemler_Tipi.ortakDeğişim);
+            if (cb15.Checked) işlem.Yap(İşlemler_Tipi.ortakBinekDüzeltme);
+
+            if (cb1.Checked) işlem.Yap(İşlemler_Tipi.ideaSoftTablosuOluştur);
+
+            if (rbGüncelleme.Checked) //Sadece Güncelleme yapılıyor.
             {
-                mesaj += şimdi + "\tMotoraşin verileri çekilmeye başladı.\n";
-                label3.Text = "Motorasin verileri çekiliyor.";
+                label3.Text = "Sadece güncelleme yapılıyor.";
                 label3.Refresh();
-                firmalar.Motoraşin.veriÇekmeMotoru(new object[] { firmalar.Motoraşin.stringBuilderİfadesi, firmalar.Motoraşin.anahtarlar });
-                //label3.Text = "Motorasin verileri çekildi. (" + veritabanı.kayıtSayısı("motorasin_ham").ToString() + " kayıt)";
-                //label3.Refresh();
-                mesaj += şimdi + "\tMotorasin verileri çekildi. (" + veritabanı.kayıtSayısı("motorasin_ham").ToString() + " kayıt)\n";
-            }
-            if (cb3.Checked)
-            {
-                con.Open();
-                label3.Text = "Motorasin değişim uygulanıyor.";
-                label3.Refresh();
-                firmalar.Motoraşin.degistirilmişDosyayıOlustur(con);
-                con.Close();
-            }
-            if (cb4.Checked)
-            {
-                label3.Text = "Motorasin çoklu kayıtlar siliniyor.";
-                label3.Refresh();
-                veritabanı.çokluKayıtlarıEngelle("motorasin");
-            }
-            if (cb5.Checked)
-            {
-                con.Open();
-                label3.Text = "Motorasin Ortağa aktarılıyor.";
-                label3.Refresh();
-                firmalar.Motoraşin.ortağaAktar(con);
-                con.Close();
-            }
-            if (cb6.Checked)
-            {
-                if (cumartesi_mi("motorasin"))
-                {
-                    con.Open();
-                    label3.Text = "Motorasin resimleri içe aktarılıyor.";
-                    label3.Refresh();
-                    object[] s = firmalar.Motoraşin.resimleri_kontrol_et(progressBar2, label3, con);
-                    con.Close();
-                    if (s != null)
-                    {
-                        motorasinHatlıResimler = (string)s[2];
-                        if ((int)s[0] > 0)
-                            mesaj += şimdi + "\t" + string.Format("Motorasinden {0} yeni resimden {1} tanesi içe aktarıldı. Hatalı resimler için 'Kopyala menüsünü kullanabilirsiniz.'\n", (int)s[0], (int)s[1]);
-                    }
-                }
-            }
-
-
-
-            if (cb7.Checked)
-            {
-                label3.Text = "Dinamik verileri çekiliyor.";
-                label3.Refresh();
-                mesaj += şimdi + "\tDinamik verileri çekilmeye başladı.\n";
-                firmalar.Dinamik.veriÇekmeMotoru(new object[] { firmalar.Dinamik.stringBuilderİfadesi, firmalar.Dinamik.anahtarlar });
-                //label3.Text = "Dinamik verileri çekildi. (" + veritabanı.kayıtSayısı("dinamik_ham").ToString() + " kayıt)";
-                //label3.Refresh();
-                mesaj += şimdi + "\tDinamik verileri çekildi. (" + veritabanı.kayıtSayısı("dinamik_ham").ToString() + " kayıt)\n";
-            }
-            if (cb8.Checked)
-            {
-                con.Open();
-                label3.Text = "Dinamik değişim uygulanıyor.";
-                label3.Refresh();
-                firmalar.Dinamik.degistirilmişDosyayıOlustur(con);
-                con.Close();
-
-            }
-            if (cb9.Checked)
-            {
-                label3.Text = "Dinamik çoklu kayıtlar siliniyor.";
-                label3.Refresh();
-                veritabanı.çokluKayıtlarıEngelle("dinamik");
-            }
-            if (cb10.Checked)
-            {
-                con.Open();
-                label3.Text = "Dinamik Ortağa aktarılıyor.";
-                label3.Refresh();
-                firmalar.Dinamik.ortağaAktar(con);
-                con.Close();
-            }
-            if (cb11.Checked)
-            {
-                if (cumartesi_mi("dinamik"))
-                {
-                    con.Open();
-                    label3.Text = "Dinamik resimleri içe aktarılıyor.";
-                    label3.Refresh();
-                    object[] s = firmalar.Dinamik.resimleri_kontrol_et(progressBar2, label3, con);
-                    con.Close();
-                    if (s != null)
-                    {
-                        dinamikHatlıResimler = (string)s[2];
-                        if ((int)s[0] > 0)
-                            mesaj += şimdi + "\t" + string.Format("Dinamikten {0} yeni resimden {1} tanesi içe aktarıldı. Hatalı resimler için 'Kopyala menüsünü kullanabilirsiniz.'\n", (int)s[0], (int)s[1]);
-                    }
-                }
-            }
-
-
-            if (cb12.Checked)
-            {
-                con.Open();
-                label3.Text = "Çift kayıtlardan label, metakeywords ve detail alanları dinamik firmasından gelenlerinki ile aynı yapılıyor";
-                label3.Refresh();
-                //çift kayıtlardan label,metakeywords ve detail alanları dinamik firmasından gelenlerinki ile aynı yapılıyor
-                MySqlCommand cmd = new MySqlCommand("UPDATE ortak t1 INNER JOIN ortak t2 ON t1.stok_kodu=t2.stok_kodu AND t1.id<>t2.id SET t1.label=t2.label, t1.metaKeywords=t2.metaKeywords, t1.detail=t2.detail, t1.barcode=t2.barcode WHERE t2.nereden = 'dinamik'", con);
-                cmd.CommandTimeout = 600;
-                veritabanı.cmdExecute(cmd);
-
-                cmd.CommandText = "DROP TABLE IF EXISTS ortak_;CREATE TABLE ortak_ LIKE ortak;INSERT INTO ortak_ SELECT * FROM ortak;";
-                veritabanı.cmdExecute(cmd);
-
-                label3.Text = "Ortak stoğu olmayan veya fiyatı 0 olanlar siliniyor."; label3.Refresh();
-                cmd.CommandText = "DELETE FROM ortak WHERE ortak.stok_amount<=0 OR ortak.price<=0 OR ortak.paket_miktari<=0;";
-                veritabanı.cmdExecute(cmd);
-
-                label3.Text = "Çift kayıtlardan fiyatı yüksek olan siliniyor."; label3.Refresh();
-                cmd.CommandText = string.Format("DELETE t1 FROM ortak t1 INNER JOIN ortak t2 WHERE t1.stok_kodu = t2.stok_kodu and TL_Fiyat_Ver(t1.currency_abbr, t1.price, {0}, {1}) > TL_Fiyat_Ver(t2.currency_abbr, t2.price, {0}, {1}); DELETE t1 FROM ortak t1 INNER JOIN ortak t2 WHERE t1.stok_kodu = t2.stok_kodu and t1.id < t2.id; ", Entegrasyon.kurNedir("USD").ToString().Replace(',', '.'), Entegrasyon.kurNedir("EUR").ToString().Replace(',', '.'));
-                veritabanı.cmdExecute(cmd);
-
-
-                con.Close();
-            }
-
-            if (cb13.Checked)
-            {
-
-                //burada  veritabanı.işlemGöreceklerListesi metodu sadece bu kayıtları silmek için kullanılıyor. metoda gerek olmadan burada o işlemler yapılacak.
-                con.Open();
-                label3.Text = "İşlem görecekler tesbit edilip diğerleri ortaktan siliniyor.";
-                label3.Refresh();
-
-                string[] fiyatArttırılacaklar = new string[listBox2.Items.Count];
-                listBox2.Items.CopyTo(fiyatArttırılacaklar, 0);
-                veritabanı.icindeGecenlerinFiyatlariniArttir(fiyatArttırılacaklar, (double)numericUpDown2.Value, radioButton1.Checked);
-
-                string[] silinecekler = new string[listBox1.Items.Count];
-                listBox1.Items.CopyTo(silinecekler, 0);
-                veritabanı.icindeGecenleriSil(silinecekler);
-
-
-                string işlemGöreceklerlerin_Stok_kodu_Listesi = veritabanı.işlemGöreceklerListesi(150000, Entegrasyon.kurNedir("USD").ToString().Replace(',', '.'), Entegrasyon.kurNedir("EUR").ToString().Replace(',', '.'));
-                MySqlCommand cmd = new MySqlCommand(string.Format("DELETE FROM ortak WHERE ortak.stok_kodu {0} ", (işlemGöreceklerlerin_Stok_kodu_Listesi.IndexOf(',') > -1 ? "NOT IN " : "!=") + işlemGöreceklerlerin_Stok_kodu_Listesi), con);
-                cmd.CommandTimeout = 600;
-                veritabanı.cmdExecute(cmd);
-
-                //burada elde olanlar Yoksa ekleniyor varsa güncelleniyor.
-                cmd.CommandText = "insert INTO ortak(stok_kodu, label, metaKeywords, brand, category_path, barcode, price, currency_abbr, paket_miktari, stok_amount, stock_type, discount, discountType, nereden, detail, discountedSortOrder) (select stok_kodu, label, metaKeywords, brand, category_path, barcode,price, currency_abbr, paket_miktari, stok_amount, stock_type, discount, discountType, nereden, detail, discountedSortOrder from elde_olanlar WHERE elde_olanlar.stok_kodu NOT IN (SELECT ortak.stok_kodu FROM ortak))";
-                veritabanı.cmdExecute(cmd);
- 
-                con.Close();
-            }
-            if (cb14.Checked)
-            {
-                con.Open();
-                label3.Text = "Ortak değişim uygulanıyor.";
-                label3.Refresh();
-                MySqlCommand cmd = new MySqlCommand("call degistir('ortak');", con);
-                cmd.CommandTimeout = 600;
-                veritabanı.cmdExecute(cmd);
-                con.Close();
-            }
-            if (cb15.Checked)
-            {
-                label3.Text = "Binek düzeltme yapılıyor.";
-                label3.Refresh();
-                veritabanı.binekDüzeltme();
-            }
-
-            if (cb16.Checked)
-            {
-                List<string> skular = new List<string>();
-                label3.Text = "İndirimli ürünler için discountSortOrder değerleri ayarlanıyor.";
-                label3.Refresh();
-                con.Open();
-                MySqlCommand cmd = new MySqlCommand(string.Format("SELECT stok_kodu FROM ortak WHERE ortak.discount>0 order by TL_Fiyat_Ver(ortak.currency_abbr, ortak.price, {0}, {1})*ortak.discount/100 DESC LIMIT 100", Entegrasyon.kurNedir("USD").ToString().Replace(',', '.'), Entegrasyon.kurNedir("EUR").ToString().Replace(',', '.')), con);
-                MySqlDataReader dr = cmd.ExecuteReader();
-                while (dr.Read()) skular.Add(dr.GetString(0));
-                dr.Close();
-                for (int i = 0; i < skular.Count; i++)
-                {
-                    cmd.CommandText = string.Format("update ortak set discountedSortOrder={0} where stok_kodu='{1}'", i, skular[i]);
-                    veritabanı.cmdExecute(cmd);
-                }
-                con.Close();
-            }
-
-            if (cb1.Checked)
-            {
-                label3.Text = "İdeasoft tablosu oluşturuluyor";
-                label3.Refresh();
-                IdeaSoftVeritabanı.ideaSoftTablosunuOluştur();
-            }
-
-            if (rbGüncelleme.Checked)
-            {
-
             }
 
             if (rbNormal.Checked)
@@ -389,91 +212,24 @@ namespace NettenGelsin
             }
             //if (cb17.Checked)
             {
-                label3.Text = "Olmayan kayıtlar siliniyor.";
-                label3.Refresh();
-                int x = Entegrasyon.ürünleriSil("SELECT id FROM ideasoft WHERE stok_kodu NOT IN (SELECT stok_kodu FROM ortak);", progressBar2, label3);
-                mesaj += şimdi + "\t" + x.ToString() + " ürün silindi.\n";
+                işlem.Yap(İşlemler_Tipi.ortaktaOlmayanKayıtlarSitedenSiliniyor);
             }
             //if (cb18.Checked)
             {
-                label3.Text = "Ürünlerin ekleme işlemi yapılıyor.";
-                label3.Refresh();
-                int x = Entegrasyon.ürünleriEkle(Entegrasyon.işlemTipi.eklenecek, progressBar2, label3);
-                mesaj += şimdi + "\t" + x.ToString() + " ürün eklendi.\n";
+                işlem.Yap(İşlemler_Tipi.sitedeOlmayanKayıtlarEkleniyor);
             }
             //if (cb19.Checked)
             {
-                label3.Text = "ürünlerin güncelleme işlemi yapılıyor.";
-                label3.Refresh();
-                int x = Entegrasyon.ürünleriEkle(Entegrasyon.işlemTipi.güncellenecek, progressBar2, label3);
-                mesaj += şimdi + "\t" + x.ToString() + " ürün güncellendi.\n";
+                işlem.Yap(İşlemler_Tipi.güncellemeYapılıyor);
             }
-            if (cb20.Checked)
-            {
-                label3.Text = "Yayındaki ürünlerden resmi olmayanların resimleri gönderiliyor.";
-                progressBar2.Value = 0;
-                con.Open();
-                int adet = 0;
-                MySqlCommand cmd = new MySqlCommand("select count(resimler.sku) from products inner join resimler on products.sku=resimler.sku where products.id not in (select product_id from product_images)", con);
-                cmd.CommandTimeout = 1200;
-                MySqlDataReader dr = cmd.ExecuteReader();
-                if (dr.Read()) adet = dr.GetInt32(0);
-                dr.Close();
-                if (adet == 0) return;
-
-                int başlama = 0;
-                int miktar = 100;
-                label3.Tag = label3.Text;
-                List<string> bodys = new List<string>();
-                int bekleme = Thread_Apiİşlemleri.bekleme;
-                IRestResponse data;
-                int x = 0;
-                do
-                {
-                    progressBar2.Value = 0; progressBar2.Maximum = miktar;
-                    label3.Text = string.Concat("(", başlama / miktar + 1, "/", adet / miktar, ") ", (string)label3.Tag); label3.Refresh();
-                    cmd.CommandText = string.Format("SELECT resimler.sku,products.id,resimler.resim_base64 FROM products inner join resimler on products.sku = resimler.sku WHERE products.id not in (select product_id from product_images) LIMIT 0,{0}", miktar);
-                    dr = cmd.ExecuteReader();
-                    bodys.Clear();
-                    while (dr.Read())
-                    {
-                        progressBar2.Value++; progressBar2.Refresh();
-                        bodys.Add(Resim_işlemleri.getData_bodyFormat(dr.GetString(0), dr.GetInt32(1), dr.GetString(2)));
-                    }
-                    dr.Close();
-                    progressBar2.Maximum = bodys.Count;
-                    progressBar2.Value = 0;
-                    if (bodys.Count > 0)
-                    {
-                        foreach (string body in bodys)
-                        {
-                            progressBar2.Value++; progressBar2.Refresh();
-                            while (true)
-                            {
-                                data = Entegrasyon.POST("product_images", body);
-                                if (data.IsSuccessful || bekleme > 3000) break;
-                                Thread.Sleep(bekleme);
-                                bekleme *= 3;
-                            }
-                            if (data.IsSuccessful)
-                            {
-                                dynamic d = JsonConvert.DeserializeObject(data.Content);
-                                if (d["id"] != null) { IdeaSoftVeritabanı.resimOluştur(d, con); x++; }
-
-                            }
-                        }
-                    }
-                    başlama += miktar;
-                } while ((başlama + miktar) < adet);
-                mesaj += şimdi + "\t" + x.ToString() + " ürün resmi gönderildi.\n";
-                con.Close();
-            }
+            if (cb20.Checked) işlem.Yap(İşlemler_Tipi.yayındakiÜrünlerdenResmiOlmayanlarınResmiGönderiliyor);
+            
             label3.Text = "İŞLEMLER BİTTİ.";
             //MessageBox.Show("İşlemler Bitti");
-            if (mesaj != "")
+            if (İşlem.mesaj != "")
             {
-                mesaj = "GÜNCELLEME İŞLEMİ RAPORU\n\n" + mesaj;
-                email.send("Günlük işlem", mesaj);
+                İşlem.mesaj = "GÜNCELLEME İŞLEMİ RAPORU\n\n" + İşlem.mesaj;
+                email.send("Günlük işlem", İşlem.mesaj);
             }
         }
 
@@ -630,12 +386,12 @@ namespace NettenGelsin
 
         private void button13_Click(object sender, EventArgs e)
         {
-            string deger="";
+            string deger = "";
             MySqlConnection con = new MySqlConnection(veritabanı.connectionString);
             con.Open();
             while (true)
             {
-                deger = Microsoft.VisualBasic.Interaction.InputBox("Elde olan ürünün stok kodu:", "Ekleme",deger);
+                deger = Microsoft.VisualBasic.Interaction.InputBox("Elde olan ürünün stok kodu:", "Ekleme", deger);
                 if (deger.Trim() == "") return;
                 MySqlCommand cmd = new MySqlCommand(string.Format("select stok_kodu from elde_olanlar where stok_kodu='{0}'", deger), con);
                 MySqlDataReader dr = cmd.ExecuteReader();
