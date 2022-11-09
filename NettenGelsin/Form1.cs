@@ -164,66 +164,65 @@ namespace NettenGelsin
         }
         private void button9_Click_1(object sender, EventArgs e)
         {
-            string mesaj = "";
+            İşlem işlem = new İşlem(label3, progressBar2, listBox2, listBox1, numericUpDown2, radioButton1, checkBoxDebugMod);
 
-            MySqlConnection con = new MySqlConnection(veritabanı.connectionString);
+            işlem.Yap(İşlemler_Tipi.sadeceGüncelleme);
 
-            İşlem işlem = new İşlem(label3, progressBar2, listBox2, listBox1, numericUpDown2, radioButton1, con);
 
-            if (cb2.Checked) işlem.Yap(İşlemler_Tipi.motoraşinVeriÇek);
-            if (cb3.Checked) işlem.Yap(İşlemler_Tipi.motoraşinDeğişim);
-            if (cb4.Checked) işlem.Yap(İşlemler_Tipi.motoraşinÇokluKayıtlarıSil);
-            if (cb5.Checked) işlem.Yap(İşlemler_Tipi.motoraşinOrtağaAktar);
-            if (cb6.Checked) işlem.Yap(İşlemler_Tipi.motoraşinResimleriİçeAktar);
+            //if (cb2.Checked) işlem.Yap(İşlemler_Tipi.motoraşinVeriÇek);
+            //if (cb3.Checked) işlem.Yap(İşlemler_Tipi.motoraşinDeğişim);
+            //if (cb4.Checked) işlem.Yap(İşlemler_Tipi.motoraşinÇokluKayıtlarıSil);
+            //if (cb5.Checked) işlem.Yap(İşlemler_Tipi.motoraşinOrtağaAktar);
+            //if (cb6.Checked) işlem.Yap(İşlemler_Tipi.motoraşinResimleriİçeAktar);
 
-            if (cb7.Checked) işlem.Yap(İşlemler_Tipi.dinamikVerileriÇek);
-            if (cb8.Checked) işlem.Yap(İşlemler_Tipi.dinamikDeğişim);
-            if (cb9.Checked) işlem.Yap(İşlemler_Tipi.dinamikÇokluKayıtlarıSil);
-            if (cb10.Checked) işlem.Yap(İşlemler_Tipi.dinamikOrtağaAktar);
-            if (cb11.Checked) işlem.Yap(İşlemler_Tipi.dinamikResimleriİçeAktar);
+            //if (cb7.Checked) işlem.Yap(İşlemler_Tipi.dinamikVerileriÇek);
+            //if (cb8.Checked) işlem.Yap(İşlemler_Tipi.dinamikDeğişim);
+            //if (cb9.Checked) işlem.Yap(İşlemler_Tipi.dinamikÇokluKayıtlarıSil);
+            //if (cb10.Checked) işlem.Yap(İşlemler_Tipi.dinamikOrtağaAktar);
+            //if (cb11.Checked) işlem.Yap(İşlemler_Tipi.dinamikResimleriİçeAktar);
 
-            if (cb12.Checked) işlem.Yap(İşlemler_Tipi.ortakTekrarlıKayıtlarınBilgileriniDinamiktekiGibiYap);
-            if (cb13.Checked) işlem.Yap(İşlemler_Tipi.ortak_TablosunuOluştur);
-            if (cb14.Checked) işlem.Yap(İşlemler_Tipi.ortakDeğişim);
-            if (cb15.Checked) işlem.Yap(İşlemler_Tipi.ortakBinekDüzeltme);
+            //if (cb12.Checked) işlem.Yap(İşlemler_Tipi.ortakTekrarlıKayıtlarınBilgileriniDinamiktekiGibiYap);
+            //if (cb13.Checked) işlem.Yap(İşlemler_Tipi.ortak_TablosunuOluştur);
+            //if (cb14.Checked) işlem.Yap(İşlemler_Tipi.ortakDeğişim);
+            //if (cb15.Checked) işlem.Yap(İşlemler_Tipi.ortakBinekDüzeltme);
 
-            if (cb1.Checked) işlem.Yap(İşlemler_Tipi.ideaSoftTablosuOluştur);
+            //if (cb1.Checked) işlem.Yap(İşlemler_Tipi.ideaSoftTablosuOluştur);
 
-            if (rbGüncelleme.Checked) //Sadece Güncelleme yapılıyor.
-            {
-                label3.Text = "Sadece güncelleme yapılıyor.";
-                label3.Refresh();
-            }
+            //if (rbGüncelleme.Checked) //Sadece Güncelleme yapılıyor.
+            //{
+            //    label3.Text = "Sadece güncelleme yapılıyor.";
+            //    label3.Refresh();
+            //}
 
-            if (rbNormal.Checked)
-            {
-                if (rbRaporOnay.Checked)
-                {
+            //if (rbNormal.Checked)
+            //{
+            //    if (rbRaporOnay.Checked)
+            //    {
 
-                }
-                else if (rbSadeceGüncelleme.Checked)
-                {
+            //    }
+            //    else if (rbSadeceGüncelleme.Checked)
+            //    {
 
-                }
-                else //Sorun yok silmeye devam
-                {
+            //    }
+            //    else //Sorun yok silmeye devam
+            //    {
 
-                }
-            }
-            //if (cb17.Checked)
-            {
-                işlem.Yap(İşlemler_Tipi.ortaktaOlmayanKayıtlarSitedenSiliniyor);
-            }
-            //if (cb18.Checked)
-            {
-                işlem.Yap(İşlemler_Tipi.sitedeOlmayanKayıtlarEkleniyor);
-            }
-            //if (cb19.Checked)
-            {
-                işlem.Yap(İşlemler_Tipi.güncellemeYapılıyor);
-            }
-            if (cb20.Checked) işlem.Yap(İşlemler_Tipi.yayındakiÜrünlerdenResmiOlmayanlarınResmiGönderiliyor);
-            
+            //    }
+            //}
+            ////if (cb17.Checked)
+            //{
+            //    işlem.Yap(İşlemler_Tipi.ortaktaOlmayanKayıtlarSitedenSiliniyor);
+            //}
+            ////if (cb18.Checked)
+            //{
+            //    işlem.Yap(İşlemler_Tipi.sitedeOlmayanKayıtlarEkleniyor);
+            //}
+            ////if (cb19.Checked)
+            //{
+            //    işlem.Yap(İşlemler_Tipi.güncellemeYapılıyor);
+            //}
+            //if (cb20.Checked) işlem.Yap(İşlemler_Tipi.yayındakiÜrünlerdenResmiOlmayanlarınResmiGönderiliyor);
+
             label3.Text = "İŞLEMLER BİTTİ.";
             //MessageBox.Show("İşlemler Bitti");
             if (İşlem.mesaj != "")

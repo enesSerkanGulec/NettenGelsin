@@ -33,6 +33,7 @@ namespace NettenGelsin
         ortaktaOlmayanKayıtlarSitedenSiliniyor,
         sitedeOlmayanKayıtlarEkleniyor,
         güncellemeYapılıyor,
-        yayındakiÜrünlerdenResmiOlmayanlarınResmiGönderiliyor
+        yayındakiÜrünlerdenResmiOlmayanlarınResmiGönderiliyor,
+        sadeceGüncelleme
     }
 }

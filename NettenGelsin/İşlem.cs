@@ -13,14 +13,14 @@ namespace NettenGelsin
 {
     public class İşlem
     {
-        MySqlConnection con;
-        MySqlCommand cmd = new MySqlCommand();
+
         public Label label;
         public ProgressBar progressBar;
         public ListBox listBoxFiyatArttırılacaklar;
         public ListBox listBoxSilinecekler;
         public NumericUpDown numericUpDown;
         public RadioButton radioButton;
+        public bool debugMode;
 
         public static string mesaj;
         public static string motorasinHatlıResimler = "";
@@ -41,20 +41,22 @@ namespace NettenGelsin
             else return false;
         }
 
-        public İşlem(Label label_, ProgressBar progressBar_, ListBox listBoxFiyatArttırılacaklar_, ListBox listBoxSilinecekler_, NumericUpDown numericUpDown_, RadioButton radioButton_, MySqlConnection con_)
+        public İşlem(Label label_, ProgressBar progressBar_, ListBox listBoxFiyatArttırılacaklar_, ListBox listBoxSilinecekler_, NumericUpDown numericUpDown_, RadioButton radioButton_, CheckBox checkBoxDebug)
         {
             label = label_;
-            con = con_;
             progressBar = progressBar_;
             radioButton = radioButton_;
             numericUpDown = numericUpDown_;
             listBoxFiyatArttırılacaklar = listBoxFiyatArttırılacaklar_;
             listBoxSilinecekler = listBoxSilinecekler_;
+            debugMode = checkBoxDebug.Checked;
         }
 
         public void Yap(İşlemler_Tipi işlem)
         {
             int x;
+            MySqlConnection con = new MySqlConnection(veritabanı.connectionString);
+            MySqlCommand cmd = new MySqlCommand();
             MySqlDataReader dr;
 
             switch (işlem)
@@ -169,7 +171,6 @@ namespace NettenGelsin
                     break;
                 #endregion
 
-
                 #region ortakTekrarlıKayıtlarınBilgileriniDinamiktekiGibiYap
                 case İşlemler_Tipi.ortakTekrarlıKayıtlarınBilgileriniDinamiktekiGibiYap:
                     con.Open();
@@ -203,7 +204,7 @@ namespace NettenGelsin
                     con.Close();
                     break;
                 #endregion
-               
+
                 #region ortakİçindeGeçenlerinFiyatlarınıArttır
                 case İşlemler_Tipi.ortakİçindeGeçenlerinFiyatlarınıArttır:
                     string[] fiyatArttırılacaklar = new string[listBoxFiyatArttırılacaklar.Items.Count];
@@ -281,7 +282,7 @@ namespace NettenGelsin
                     Yap(İşlemler_Tipi.ortakTekrarlıKayıtlarınBilgileriniDinamiktekiGibiYap);
                     Yap(İşlemler_Tipi.ortaktan_Stok_Fiyat_PaketMiktarı_SıfırOlanlarıSil);
                     Yap(İşlemler_Tipi.ortakTekrarlıKayıtlardanYüksekFiyatlılarıSil);
-                    
+
                     Yap(İşlemler_Tipi.ortakİçindeGeçenlerinFiyatlarınıArttır);
                     Yap(İşlemler_Tipi.ortakSilinecekleriSil);
                     Yap(İşlemler_Tipi.ortakTablosunuBoyutununKüçült);
@@ -292,7 +293,7 @@ namespace NettenGelsin
                     Yap(İşlemler_Tipi.ortakDiscountSortOrderAyarlanıyor);
                     break;
                 #endregion
-                
+
                 #region ideaSoftTablosuOluştur
                 case İşlemler_Tipi.ideaSoftTablosuOluştur:
                     label.Text = "İdeasoft tablosu oluşturuluyor";
@@ -336,7 +337,7 @@ namespace NettenGelsin
                     if (dr.Read()) adet = dr.GetInt32(0);
                     dr.Close();
                     if (adet == 0) break;
-                    
+
                     int başlama = 0;
                     int miktar = 100;
                     label.Tag = label.Text;
@@ -384,6 +385,39 @@ namespace NettenGelsin
                     con.Close();
                     break;
                 #endregion
+
+
+                #region SADECE_GÜNCELLEME
+                case İşlemler_Tipi.sadeceGüncelleme:
+                    Yap(İşlemler_Tipi.motoraşinVeriÇek);
+                    Yap(İşlemler_Tipi.motoraşinDeğişim);
+                    Yap(İşlemler_Tipi.motoraşinÇokluKayıtlarıSil);
+                    Yap(İşlemler_Tipi.motoraşinOrtağaAktar);
+
+                    Yap(İşlemler_Tipi.dinamikVerileriÇek);
+                    Yap(İşlemler_Tipi.dinamikDeğişim);
+                    Yap(İşlemler_Tipi.dinamikÇokluKayıtlarıSil);
+                    Yap(İşlemler_Tipi.dinamikOrtağaAktar);
+
+                    Yap(İşlemler_Tipi.ortakTekrarlıKayıtlarınBilgileriniDinamiktekiGibiYap);
+                    Yap(İşlemler_Tipi.ortakTekrarlıKayıtlardanYüksekFiyatlılarıSil);
+
+                    Yap(İşlemler_Tipi.ortakİçindeGeçenlerinFiyatlarınıArttır);
+
+                    Yap(İşlemler_Tipi.ortakDeğişim);
+                    Yap(İşlemler_Tipi.ortakBinekDüzeltme);
+                    Yap(İşlemler_Tipi.ortakDiscountSortOrderAyarlanıyor);
+
+                    Yap(İşlemler_Tipi.ideaSoftTablosuOluştur);
+
+                    label.Text = "Ürünlerin güncelleme işlemi yapılıyor.";
+                    label.Refresh();
+                    x = Entegrasyon.sadeceGüncelle(progressBar, label, debugMode);
+                    mesaj += şimdi + "\t" + x.ToString() + " ürün güncellendi.\n";
+                    break;
+                #endregion
+                default:
+                    break;
             }
         }
     }

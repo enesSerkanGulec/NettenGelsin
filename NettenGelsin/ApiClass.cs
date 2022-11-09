@@ -269,7 +269,7 @@ namespace NettenGelsin
             if (DateTime.Now.Subtract(yenilemeZamanı).TotalSeconds < 300)
             {
                 Form1.hata++;
-                log.Yaz("Token key refresh hatası. "+"Hata adedi: "+Form1.hata.ToString()+" Zaman: " + DateTime.Now.ToString(),yenilemeZamanı.ToString());
+                log.Yaz("Token key refresh hatası. " + "Hata adedi: " + Form1.hata.ToString() + " Zaman: " + DateTime.Now.ToString(), yenilemeZamanı.ToString());
                 return true;
             }
             log.Yaz("TokenKey yenileniyor..", "TokenKey");
@@ -278,7 +278,7 @@ namespace NettenGelsin
             var request = new RestRequest(Method.GET);
             request.AlwaysMultipartFormData = true;
 
-            
+
             request.AddParameter("grant_type", "refresh_token");
             request.AddParameter("client_id", Entegrasyon.clientId);
             request.AddParameter("client_secret", Entegrasyon.clientSecret);
@@ -758,7 +758,7 @@ namespace NettenGelsin
                 }
             }
             //satınAlmaLimiti var ve ID değerini aldık.
-            if (satınAlmaLimitiID == -1 && satınAlmaLimiti>1) return false;
+            if (satınAlmaLimitiID == -1 && satınAlmaLimiti > 1) return false;
 
             object[] x = IdeaSoftVeritabanı.purchase_limitation_items_ID_ve_limitID_Getir(ürünID, con);
             int id = (int)x[0];
@@ -901,11 +901,10 @@ namespace NettenGelsin
             return ifade.Substring(0, 255).Trim();
         }
 
-        public static object ürünEkleGüncelle(object[] ürünbilgileri, MySqlConnection con,bool hepsiniGüncelle=false)
+        public static object ürünEkleGüncelle(object[] ürünbilgileri, MySqlConnection con)
         {
             string durum = (string)ürünbilgileri[17];
-            //if (durum == "Y" || durum == "X") return HATA("[durum Y veya durum X] " + (string)ürünbilgileri[2]);
-            if (durum=="X" || durum=="Y" && !hepsiniGüncelle) return HATA("[durum Y veya durum X] " + (string)ürünbilgileri[2]);
+            if (durum == "X" || durum == "Y") return HATA("[durum Y veya durum X] " + (string)ürünbilgileri[2]);
             object[] kategoriID;
             object[] markaID;
             int currencyID = IdeaSoftVeritabanı.currencyIDGetir((string)ürünbilgileri[8], con);
@@ -919,7 +918,7 @@ namespace NettenGelsin
             string slug = (string)ürünbilgileri[19];
             if (slug != "") slug = " \"slug\":\"" + slug + "\",";
             string name = (string)ürünbilgileri[2];
-            if (!(durum == "M" || durum == "C" || durum == "B") || hepsiniGüncelle)
+            if (!(durum == "M" || durum == "C" || durum == "B"))
             {
                 body = string.Format("{{\"name\": \"{0}\"," + slug + " \"fullName\": \"{0}\", \"sku\": \"{1}\", \"barcode\": \"{2}\", \"price1\": {3}, \"warranty\": 2, \"tax\": 18, \"stockAmount\": {4}, \"stockTypeLabel\": \"{5}\", \"discount\": {6}, \"discountType\": 1, \"moneyOrderDiscount\": 3, \"status\": 1, \"taxIncluded\": 0, \"distributor\": \"{7}\", \"customShippingDisabled\": 1, \"metaKeywords\": \"{8}\", \"metaDescription\": \"{0}\", \"searchKeywords\": \"{8}\", \"installmentThreshold\": \"-\", \"discountedSortOrder\":{11}, \"brand\": {{ \"id\": {9}}}, \"currency\": {{ \"id\": {10}}}}}", (name.Length <= 255 ? name : name.Substring(0, 255)), (string)ürünbilgileri[1], ((string)ürünbilgileri[6]).Replace("\t", ""), ((float)ürünbilgileri[7]).ToString().Replace(',', '.'), (int)ürünbilgileri[10], (string)ürünbilgileri[11], (int)ürünbilgileri[12], (string)ürünbilgileri[14], uzunlukAyarla((string)(ürünbilgileri[3].GetType().Equals(typeof(DBNull)) ? "" : ürünbilgileri[3])), (int)markaID[1], currencyID, ürünbilgileri[16].GetType().Equals(typeof(DBNull)) ? "null" : ürünbilgileri[16].ToString());
                 body = body.Replace("\t", " ").Replace("\r\n", " ").Replace("\r", " ").Replace("\n", " ");
@@ -971,9 +970,9 @@ namespace NettenGelsin
 
             if (product_id.Count >= 10000)
             {
-                string s= string.Format("Silinecek ürün sayısı {0} adettir. ",product_id.Count);
+                string s = string.Format("Silinecek ürün sayısı {0} adettir. ", product_id.Count);
                 email.send(s + "Program sizin cevabınız bekliyor.", "Onay gerekli");
-                if (DialogResult.No==MessageBox.Show(s+ "İşleme devam etmek istiyor musunuz ? ", "İşleme devam için onayınız gerekli",MessageBoxButtons.YesNo,MessageBoxIcon.Warning))
+                if (DialogResult.No == MessageBox.Show(s + "İşleme devam etmek istiyor musunuz ? ", "İşleme devam için onayınız gerekli", MessageBoxButtons.YesNo, MessageBoxIcon.Warning))
                 {
                     MessageBox.Show("İşlemi iptal ettiniz..");
                     return -1;
@@ -1003,12 +1002,22 @@ namespace NettenGelsin
 
         public enum işlemTipi { eklenecek = 'E', güncellenecek = 'G', sadeceGüncelleme = 'S' };
 
-        public static int ürünleriEkle(işlemTipi işlem = işlemTipi.güncellenecek, ProgressBar pb = null, Label lb = null,bool hepsiniGüncelle=false)
+        public static int sadeceGüncelle(ProgressBar pb = null, Label lb = null, bool debug=false)
         {
             MySqlConnection con = new MySqlConnection(veritabanı.connectionString);
             con.Open();
 
-            string cmdText = string.Format(işlem == işlemTipi.eklenecek ? ("SELECT ortak.*, 'E', '', if(slug.slug is null,'',slug.slug) from (ortak left join slug on ortak.stok_kodu=slug.sku) where stok_kodu not in (select stok_kodu from ideasoft)") : ("SELECT t.* FROM (SELECT ortak.*, durumNedir(ortak.stok_kodu, {0}, {1}, {2}) AS d, ideasoft.id as p_id, if (slug.slug is null,'',slug.slug) AS s FROM ((ortak inner join ideasoft on ortak.stok_kodu=ideasoft.stok_kodu) left join slug on ortak.stok_kodu = slug.sku)) AS t WHERE t.d <> 'E'{3}"), Entegrasyon.kurNedir("USD").ToString().Replace(',', '.'), Entegrasyon.kurNedir("EUR").ToString().Replace(',', '.'), 3, hepsiniGüncelle?"": " AND t.d <> 'Y' AND t.d <> 'I'");
+            string debugDosya = string.Format(@"
+DROP TABLE if EXISTS {0}; 
+create table debugDosya SELECT ortak.*, durumNedir(ortak.stok_kodu, {0}, {1}, {2}) AS d, ideasoft.id as p_id, if(slug.slug is null,'',slug.slug) as s from (ortak inner join ideasoft on ortak.stok_kodu=ideasoft.stok_kodu) left join slug on ortak.stok_kodu = slug.sku)", Entegrasyon.kurNedir("USD").ToString().Replace(',', '.'), Entegrasyon.kurNedir("EUR").ToString().Replace(',', '.'), 3);
+            if (debug)
+            {
+                MySqlCommand cmd1 = new MySqlCommand(debugDosya, con);
+                cmd1.CommandTimeout = 600;
+                veritabanı.cmdExecute(cmd1);
+            }
+
+            string cmdText = string.Format("SELECT ortak.*, durumNedir(ortak.stok_kodu, {0}, {1}, {2}) AS d, ideasoft.id as p_id, if(slug.slug is null,'',slug.slug) as s from (ortak inner join ideasoft on ortak.stok_kodu=ideasoft.stok_kodu) left join slug on ortak.stok_kodu = slug.sku)", Entegrasyon.kurNedir("USD").ToString().Replace(',', '.'), Entegrasyon.kurNedir("EUR").ToString().Replace(',', '.'), 3);
 
             MySqlCommand cmd = new MySqlCommand(cmdText, con);
             cmd.CommandTimeout = 600;
@@ -1037,8 +1046,52 @@ namespace NettenGelsin
             {
                 i++;
                 pb.Value++; pb.Refresh(); lb.Text = string.Concat("(", pb.Value, '/', pb.Maximum, ") ", text); lb.Refresh();
-                if ((string)ürünler[0][17] == "Y" && !hepsiniGüncelle) { ürünler.RemoveAt(0); continue; }
-                Entegrasyon.ürünEkleGüncelle(ürünler[0], con, hepsiniGüncelle);
+
+                Entegrasyon.ürünEkleGüncelle(ürünler[0], con);
+                ürünler.RemoveAt(0);
+            }
+            con.Close();
+
+            pb.Visible = false;
+            return pb.Maximum;
+        }
+
+        public static int ürünleriEkle(işlemTipi işlem = işlemTipi.güncellenecek, ProgressBar pb = null, Label lb = null)
+        {
+            MySqlConnection con = new MySqlConnection(veritabanı.connectionString);
+            con.Open();
+
+            string cmdText = string.Format(işlem == işlemTipi.eklenecek ? ("SELECT ortak.*, 'E', '', if(slug.slug is null,'',slug.slug) from (ortak left join slug on ortak.stok_kodu=slug.sku) where stok_kodu not in (select stok_kodu from ideasoft)") : ("SELECT t.* FROM (SELECT ortak.*, durumNedir(ortak.stok_kodu, {0}, {1}, {2}) AS d, ideasoft.id as p_id, if (slug.slug is null,'',slug.slug) AS s FROM ((ortak inner join ideasoft on ortak.stok_kodu=ideasoft.stok_kodu) left join slug on ortak.stok_kodu = slug.sku)) AS t WHERE t.d <> 'E' AND t.d <> 'Y' AND t.d <> 'I'"), Entegrasyon.kurNedir("USD").ToString().Replace(',', '.'), Entegrasyon.kurNedir("EUR").ToString().Replace(',', '.'), 3);
+
+            MySqlCommand cmd = new MySqlCommand(cmdText, con);
+            cmd.CommandTimeout = 600;
+            MySqlDataReader dr = cmd.ExecuteReader();
+
+            int i = 0;
+            List<object[]> ürünler = new List<object[]>();
+            object[] ürünBilgileri;
+            while (dr.Read())
+            {
+                //ilk 0.-16. eleman ortak tablosundan 17. durum, 18. ürünID ve 19. de slug değeri (indis 0-19 arası olmalı)
+                ürünBilgileri = new object[20];
+                dr.GetValues(ürünBilgileri);
+                ürünler.Add(ürünBilgileri);
+            }
+            dr.Close();
+
+            //bool başarılı;
+            lb = lb ?? new Label();
+            pb = pb ?? new ProgressBar();
+            pb.Maximum = ürünler.Count;
+            pb.Value = 0;
+            pb.Visible = true;
+            string text = lb.Text;
+            while (ürünler.Count > 0)
+            {
+                i++;
+                pb.Value++; pb.Refresh(); lb.Text = string.Concat("(", pb.Value, '/', pb.Maximum, ") ", text); lb.Refresh();
+                if ((string)ürünler[0][17] == "Y") { ürünler.RemoveAt(0); continue; }
+                Entegrasyon.ürünEkleGüncelle(ürünler[0], con);
                 ürünler.RemoveAt(0);
             }
             con.Close();
