@@ -189,6 +189,7 @@ namespace NettenGelsin
                 #region ortaktan_Stok_Fiyat_PaketMiktarı_SıfırOlanlarıSil
                 case İşlemler_Tipi.ortaktan_Stok_Fiyat_PaketMiktarı_SıfırOlanlarıSil:
                     con.Open();
+                    cmd.Connection = con;
                     label.Text = "Ortak stoğu olmayan veya fiyatı 0 olanlar siliniyor."; label.Refresh();
                     cmd.CommandText = "DELETE FROM ortak WHERE ortak.stok_amount<=0 OR ortak.price<=0 OR ortak.paket_miktari<=0;";
                     veritabanı.cmdExecute(cmd);
@@ -198,6 +199,7 @@ namespace NettenGelsin
                 #region ortakTekrarlıKayıtlardanYüksekFiyatlılarıSil
                 case İşlemler_Tipi.ortakTekrarlıKayıtlardanYüksekFiyatlılarıSil:
                     con.Open();
+                    cmd.Connection = con;
                     label.Text = "Çift kayıtlardan fiyatı yüksek olan siliniyor."; label.Refresh();
                     cmd.CommandText = string.Format("DELETE t1 FROM ortak t1 INNER JOIN ortak t2 WHERE t1.stok_kodu = t2.stok_kodu and TL_Fiyat_Ver(t1.currency_abbr, t1.price, {0}, {1}) > TL_Fiyat_Ver(t2.currency_abbr, t2.price, {0}, {1}); DELETE t1 FROM ortak t1 INNER JOIN ortak t2 WHERE t1.stok_kodu = t2.stok_kodu and t1.id < t2.id; ", Entegrasyon.kurNedir("USD").ToString().Replace(',', '.'), Entegrasyon.kurNedir("EUR").ToString().Replace(',', '.'));
                     veritabanı.cmdExecute(cmd);
@@ -233,6 +235,7 @@ namespace NettenGelsin
                 case İşlemler_Tipi.ortakTablosunaEldeOlanlarıEkle:
                     //burada elde olanlar Yoksa ekleniyor varsa güncelleniyor.
                     con.Open();
+                    cmd.Connection = con;
                     cmd.CommandText = "insert INTO ortak(stok_kodu, label, metaKeywords, brand, category_path, barcode, price, currency_abbr, paket_miktari, stok_amount, stock_type, discount, discountType, nereden, detail, discountedSortOrder) (select stok_kodu, label, metaKeywords, brand, category_path, barcode,price, currency_abbr, paket_miktari, stok_amount, stock_type, discount, discountType, nereden, detail, discountedSortOrder from elde_olanlar WHERE elde_olanlar.stok_kodu NOT IN (SELECT ortak.stok_kodu FROM ortak))";
                     veritabanı.cmdExecute(cmd);
                     con.Close();

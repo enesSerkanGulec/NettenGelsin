@@ -920,7 +920,7 @@ namespace NettenGelsin
             string name = (string)ürünbilgileri[2];
             if (!(durum == "M" || durum == "C" || durum == "B"))
             {
-                body = string.Format("{{\"name\": \"{0}\"," + slug + " \"fullName\": \"{0}\", \"sku\": \"{1}\", \"barcode\": \"{2}\", \"price1\": {3}, \"warranty\": 2, \"tax\": 18, \"stockAmount\": {4}, \"stockTypeLabel\": \"{5}\", \"discount\": {6}, \"discountType\": 1, \"moneyOrderDiscount\": 3, \"status\": 1, \"taxIncluded\": 0, \"distributor\": \"{7}\", \"customShippingDisabled\": 1, \"metaKeywords\": \"{8}\", \"metaDescription\": \"{0}\", \"searchKeywords\": \"{8}\", \"installmentThreshold\": \"-\", \"discountedSortOrder\":{11}, \"brand\": {{ \"id\": {9}}}, \"currency\": {{ \"id\": {10}}}}}", (name.Length <= 255 ? name : name.Substring(0, 255)), (string)ürünbilgileri[1], ((string)ürünbilgileri[6]).Replace("\t", ""), ((float)ürünbilgileri[7]).ToString().Replace(',', '.'), (int)ürünbilgileri[10], (string)ürünbilgileri[11], (int)ürünbilgileri[12], (string)ürünbilgileri[14], uzunlukAyarla((string)(ürünbilgileri[3].GetType().Equals(typeof(DBNull)) ? "" : ürünbilgileri[3])), (int)markaID[1], currencyID, ürünbilgileri[16].GetType().Equals(typeof(DBNull)) ? "null" : ürünbilgileri[16].ToString());
+                body = string.Format("{{\"name\": \"{0}\"," + slug + " \"fullName\": \"{0}\", \"sku\": \"{1}\", \"barcode\": \"{2}\", \"price1\": {3}, \"warranty\": 2, \"tax\": 18, \"stockAmount\": {4}, \"stockTypeLabel\": \"{5}\", \"discount\": {6}, \"discountType\": 1, \"moneyOrderDiscount\": 3, \"status\": 1, \"taxIncluded\": 0, \"distributor\": \"{7}\", \"customShippingDisabled\": 1, \"metaKeywords\": \"{8}\", \"metaDescription\": \"{0}\", \"searchKeywords\": \"{8}\", \"installmentThreshold\": \"-\", \"discountedSortOrder\":{11}, \"brand\": {{ \"id\": {9}}}, \"currency\": {{ \"id\": {10}}}}}", (name.Length <= 255 ? name : name.Substring(0, 255)), (string)ürünbilgileri[1], ((string)ürünbilgileri[6]).Replace("\t", ""), ((float)ürünbilgileri[7]).ToString().Replace(',', '.'), ürünbilgileri[10], (string)ürünbilgileri[11], (int)ürünbilgileri[12], (string)ürünbilgileri[14], uzunlukAyarla((string)(ürünbilgileri[3].GetType().Equals(typeof(DBNull)) ? "" : ürünbilgileri[3])), (int)markaID[1], currencyID, ürünbilgileri[16].GetType().Equals(typeof(DBNull)) ? "null" : ürünbilgileri[16].ToString());
                 body = body.Replace("\t", " ").Replace("\r\n", " ").Replace("\r", " ").Replace("\n", " ");
 
                 IRestResponse data;
@@ -1002,22 +1002,90 @@ namespace NettenGelsin
 
         public enum işlemTipi { eklenecek = 'E', güncellenecek = 'G', sadeceGüncelleme = 'S' };
 
-        public static int sadeceGüncelle(ProgressBar pb = null, Label lb = null, bool debug=false)
+        //public static int olmayanlarıStokMiktarınıSıfırla(ProgressBar pb = null, Label lb = null)
+        //{
+
+        //}
+
+        public static int sadeceGüncelle(ProgressBar pb = null, Label lb = null, bool debug = false)
         {
             MySqlConnection con = new MySqlConnection(veritabanı.connectionString);
             con.Open();
 
             string debugDosya = string.Format(@"
-DROP TABLE if EXISTS {0}; 
-create table debugDosya SELECT ortak.*, durumNedir(ortak.stok_kodu, {0}, {1}, {2}) AS d, ideasoft.id as p_id, if(slug.slug is null,'',slug.slug) as s from (ortak inner join ideasoft on ortak.stok_kodu=ideasoft.stok_kodu) left join slug on ortak.stok_kodu = slug.sku)", Entegrasyon.kurNedir("USD").ToString().Replace(',', '.'), Entegrasyon.kurNedir("EUR").ToString().Replace(',', '.'), 3);
-            if (debug)
-            {
-                MySqlCommand cmd1 = new MySqlCommand(debugDosya, con);
-                cmd1.CommandTimeout = 600;
-                veritabanı.cmdExecute(cmd1);
-            }
+DROP TABLE if EXISTS debugDosya; 
+create table debugdosya 
+(  
+	(SELECT 
+		t.id,
+		t.stok_kodu,
+		t.label,
+		t.metaKeywords,
+		t.brand,
+		t.category_path,
+		t.barcode,
+		t.price,
+		t.currency_abbr,
+		t.paket_miktari,
+		t.stok_amount,
+		t.stock_type,
+		t.discount,
+		t.discountType,
+		t.nereden,
+		t.detail,
+		t.discountedSortOrder,
+		t.d,
+		t.p_id,
+		t.s
+	FROM 
+	(
+		SELECT 
+			ortak.*, 
+			durumFilitre(durumNedir(ortak.stok_kodu, {0}, {1}, {2})) AS d, 
+			ideasoft.id as p_id, 
+			if(slug.slug is null,'',slug.slug) AS s,
+			ideasoft.currency_abbr AS eskiBirim,
+			ideasoft.price AS eskiFiyat,
+			ortak.currency_abbr AS yeniBirim,
+			ortak.price AS yeniFiyat
+		from 
+			(ortak inner join ideasoft on ortak.stok_kodu=ideasoft.stok_kodu) left join slug on ortak.stok_kodu = slug.sku) t 
+        WHERE 
+		(t.d REGEXP '[SPM]') OR ((t.d REGEXP '[A]') AND (fiyatDegisimYuzdesi(t.eskiBirim,t.eskiFiyat,t.yeniBirim,t.yeniFiyat,{0},{1})>5))
+    )
+	UNION
+	(SELECT 
+	    ideasoft.id,
+	    ideasoft.stok_kodu,
+	    ideasoft.label,
+	    products.metaKeywords,
+	    ideasoft.brand,
+	    ideasoft.category_path,
+	    ideasoft.barcode,
+	    ideasoft.price,
+	    ideasoft.currency_abbr,
+	    ideasoft.paket_miktari,
+	    0,#ideasoft.stok_amount,
+	    ideasoft.stock_type,
+	    ideasoft.discount,
+	    ideasoft.discountType,
+	    products.distributor,
+	    product_details.details,
+	    ideasoft.discountedSortOrder,
+	    'P', #durum
+	    ideasoft.id,
+	    products.slug
+    FROM (ideasoft INNER JOIN (products INNER JOIN product_details ON products.id=product_details.product_id) ON ideasoft.id=products.id) 
+	WHERE ideasoft.stok_kodu NOT IN (SELECT ortak.stok_kodu FROM ortak) 
+	)
+);", Entegrasyon.kurNedir("USD").ToString().Replace(',', '.'), Entegrasyon.kurNedir("EUR").ToString().Replace(',', '.'), veritabanı.FiyatDeğişimYüzdesi);
+           
+            MySqlCommand cmd1 = new MySqlCommand(debugDosya, con);
+            cmd1.CommandTimeout = 600;
+            veritabanı.cmdExecute(cmd1);
 
-            string cmdText = string.Format("SELECT ortak.*, durumNedir(ortak.stok_kodu, {0}, {1}, {2}) AS d, ideasoft.id as p_id, if(slug.slug is null,'',slug.slug) as s from (ortak inner join ideasoft on ortak.stok_kodu=ideasoft.stok_kodu) left join slug on ortak.stok_kodu = slug.sku)", Entegrasyon.kurNedir("USD").ToString().Replace(',', '.'), Entegrasyon.kurNedir("EUR").ToString().Replace(',', '.'), 3);
+
+            string cmdText = "SELECT * from debugDosya";
 
             MySqlCommand cmd = new MySqlCommand(cmdText, con);
             cmd.CommandTimeout = 600;
@@ -1046,7 +1114,6 @@ create table debugDosya SELECT ortak.*, durumNedir(ortak.stok_kodu, {0}, {1}, {2
             {
                 i++;
                 pb.Value++; pb.Refresh(); lb.Text = string.Concat("(", pb.Value, '/', pb.Maximum, ") ", text); lb.Refresh();
-
                 Entegrasyon.ürünEkleGüncelle(ürünler[0], con);
                 ürünler.RemoveAt(0);
             }
@@ -1061,7 +1128,7 @@ create table debugDosya SELECT ortak.*, durumNedir(ortak.stok_kodu, {0}, {1}, {2
             MySqlConnection con = new MySqlConnection(veritabanı.connectionString);
             con.Open();
 
-            string cmdText = string.Format(işlem == işlemTipi.eklenecek ? ("SELECT ortak.*, 'E', '', if(slug.slug is null,'',slug.slug) from (ortak left join slug on ortak.stok_kodu=slug.sku) where stok_kodu not in (select stok_kodu from ideasoft)") : ("SELECT t.* FROM (SELECT ortak.*, durumNedir(ortak.stok_kodu, {0}, {1}, {2}) AS d, ideasoft.id as p_id, if (slug.slug is null,'',slug.slug) AS s FROM ((ortak inner join ideasoft on ortak.stok_kodu=ideasoft.stok_kodu) left join slug on ortak.stok_kodu = slug.sku)) AS t WHERE t.d <> 'E' AND t.d <> 'Y' AND t.d <> 'I'"), Entegrasyon.kurNedir("USD").ToString().Replace(',', '.'), Entegrasyon.kurNedir("EUR").ToString().Replace(',', '.'), 3);
+            string cmdText = string.Format(işlem == işlemTipi.eklenecek ? ("SELECT ortak.*, 'E', '', if(slug.slug is null,'',slug.slug) from (ortak left join slug on ortak.stok_kodu=slug.sku) where stok_kodu not in (select stok_kodu from ideasoft)") : ("SELECT t.* FROM (SELECT ortak.*, durumNedir(ortak.stok_kodu, {0}, {1}, {2}) AS d, ideasoft.id as p_id, if (slug.slug is null,'',slug.slug) AS s FROM ((ortak inner join ideasoft on ortak.stok_kodu=ideasoft.stok_kodu) left join slug on ortak.stok_kodu = slug.sku)) AS t WHERE t.d <> 'E' AND t.d <> 'Y' AND t.d <> 'I'"), Entegrasyon.kurNedir("USD").ToString().Replace(',', '.'), Entegrasyon.kurNedir("EUR").ToString().Replace(',', '.'), veritabanı.FiyatDeğişimYüzdesi);
 
             MySqlCommand cmd = new MySqlCommand(cmdText, con);
             cmd.CommandTimeout = 600;

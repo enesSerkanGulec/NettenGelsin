@@ -314,6 +314,8 @@ namespace NettenGelsin
         public static string Pwd = "netten2020gelsin";
         public static string Database = "nettenGelsin";
 
+        public static int FiyatDeğişimYüzdesi = 5;
+
         public static string logsTabloYapısı = "zaman DATETIME NULL DEFAULT '0000-00-00 00:00:00', mesaj TEXT NULL DEFAULT NULL, tip TINYTEXT NULL DEFAULT NULL";
         public static string logsTablosuIndexYapısı = "	PRIMARY KEY (`id`) USING BTREE, INDEX `zaman` (`zaman`) USING BTREE";
 
